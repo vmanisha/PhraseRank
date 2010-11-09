@@ -1,0 +1,17 @@
+Abstract of the paper : 
+
+             In domains like patents and biomedical information retrieval
+a set of keywords as a query may not be sufficient but a document as a
+query could be more useful. Entire content of the document as a query
+will not be feasible as the results might be noisy and irrelevant. An
+optimal query can be formed by extracting important keywords from
+the document. We propose an unsupervised approach to extract and
+rank candidate key phrases from a document. The goal is to maximize a
+retrieval score like MAP or Recall depending upon the nature of search
+task. A learning to rank method is used to select top phrases represented
+by a set of pre-retrieval features used for query performance prediction.
+The proposed keyphrase extraction technique is used to construct queries
+from patents for Invalidity Search task in patent retrieval. Experiments
+on a collection of USPTO Patents to maximize Recall and MAP show
+that our approach is comparable to the baseline methods.
+`
