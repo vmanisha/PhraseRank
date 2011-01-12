@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 
 import org.apache.lucene.analysis.SimpleAnalyzer;
+import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexReader;
@@ -41,14 +42,14 @@ public class SearchIndex {
 			Searcher searcher = new IndexSearcher(reader);
 			//System.out.println("the Query desc:\"" + args[2]+"\"");
 			//SnowballAnalyzer sa = new SnowballAnalyzer(Version.LUCENE_CURRENT,"English");
-			//SimpleAnalyzer sa = new SimpleAnalyzer();
+			WhitespaceAnalyzer sa = new WhitespaceAnalyzer();
 			//SnowballAnalyzer sa1=util.LoadStopWords(new BufferedReader (new FileReader (new File(args[1]))));
-		/*	MultiFieldQueryParser mfq,mfq1,mfq2;
-			String Query="abst:\"" + args[2]+"\""+ " desc:\"" + args[2]+"\"" + " claim:\"" + args[2]+"\"" ;
+			MultiFieldQueryParser mfq,mfq1,mfq2;
+			String Query="abst:\"" + args[2]+" cach\""+ " desc:\"" + args[2]+"\"" + " claim:\"" + args[2]+" copi\"" ;
 			String fields [] ={"abst","desc","claim"};
 			mfq = new MultiFieldQueryParser(Version.LUCENE_CURRENT,fields, sa);
-			System.out.println("Query is "+Query +" new query "+mfq.parse(Query).toString());*/
-			SpanTermQuery w1 = new SpanTermQuery(new Term("abst", "primari")); 
+			System.out.println("Query is "+Query +" new query "+mfq.parse(Query).toString());
+			/*SpanTermQuery w1 = new SpanTermQuery(new Term("abst", "primari")); 
 			SpanTermQuery w2 = new SpanTermQuery(new Term("abst", "copi"));
 			SpanQuery [] clauses = {w1, w2};
 			
@@ -62,7 +63,7 @@ public class SearchIndex {
 				count++;
 				System.out.println("doc "+spans.doc());
 			}
-			System.out.println("count is "+count);
+			System.out.println("count is "+count);*/
 			//mfq1 = new MultiFieldQueryParser(Version.LUCENE_CURRENT,fields, sa1);
 			//mfq2=  new MultiFieldQueryParser(fields, new StandardAnalyzer());
 			//System.out.println("The Query  "+mfq.parse(Query).toString());

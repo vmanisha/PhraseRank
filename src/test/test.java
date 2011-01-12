@@ -1,11 +1,18 @@
 package test;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.Vector;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,6 +22,9 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queryParser.CharStream;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.Query;
+
+import rankPhrase.testTrain.chunkPatent;
+
 
 import extraction.phraseList;
 
@@ -27,9 +37,17 @@ public class test {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		Pattern p=Pattern.compile("[A-Z]");
+		Matcher m=p.matcher("2240 NN NN NNS CD");
+			if(m.find())
+			System.out.println("MILGAYA");
+				
 		String line = "I have to go am going sales Steven<tab>Chaney + PATENT-US-GRT-2001-06189043  aaaabbb cc atcg atcgff <DOCNO>PATENT-US-GRT-2001-06189043</DOCNO>  The first router then computes an optimum assignment of a replica copy of the information, for storage in at least one newly assigned server in the network";//; No. 60/023,904 filed Aug. 14, 1996. TECHNICAL FIELD The present invention relates to television (TV) cable/antenna systems, and in particular, to a TV graphical user interface (GUI)";
 		util util = new util();
 		String line2 = "<DOCNO>PATENT-US-GRT-2001-06189043</DOCNO>";
+		long n1=23;
+		long n2= 46;
+		System.out.println("div "+n1/n2+" div(float) "+((float)n1)/n2+ " div both float "+ ((float)n1)/((float)n2));
 		System.out.println(util.process(line));
 		System.out.println("ye raha "+line2.substring(line2.indexOf(">")+1,line2.lastIndexOf("<")));
 		
@@ -153,7 +171,7 @@ public class test {
 		/*String make="" ;
 	test.Stringmaker(make);
 	System.out.println("make is "+make);*/
-		try{
+	/*	try{
 			BufferedReader br = new BufferedReader(new FileReader(new File(args[0])));
 			line="" ;
 			String split [];
@@ -165,12 +183,93 @@ public class test {
 			// TODO: handle exception
 			e.printStackTrace();
 		}
+		*/
+		
+		String line1 = "distribut, 1, 8, 10, 19, 49413, 1681530, 288407, 2019350, 39.0000, 2019350.0000, 39.0000, 2019350.0000, 15.0897, 15.0897, 15.0897, [NN], [19], 12.9294, 1.3652, 2.0747, -0.3525";
+//		String split []= line1.split("[.*]");
+		//System.out.println(line1.substring(0,line1.indexOf("[")-2)+ line1.substring(line1.lastIndexOf("]")+1));
+		System.out.println(line1.substring(line1.indexOf("["),line1.lastIndexOf("]")+1));
+		TreeMap<String, Integer> list1=new TreeMap<String,Integer>();
+		list1.put("mansi", 3);
+		list1.put("mai", 13);
+		list1.put("ai", 43);
+		list1.put("mi", 23);
+		list1.put("m", 30);
+		list1.put("i",93);
+		list1.put("si", 38);
+		list1.put("xi", 31);
+		Iterator <Entry<String, Integer>> i =sortByValues(list1).entrySet().iterator();
+		System.out.println("Integer maximum" +Integer.MAX_VALUE);
+		Entry<String, Integer> en;
+		while(i.hasNext())
+		{
+			en=i.next();
+			System.out.println("key "+en.getKey()+" value "+en.getValue());
+		}
+		try{
+			System.out.println(getNGrams("minimum weight spanning tree"));
+			System.out.println(getNGrams("JJ NN VBG NN"));
+		//	chunkPatent chP = new chunkPatent(args);
+		//	String content =chP.chunkPatentFile(new File (args[7]));
+			//System.out.println("content is "+content);
+		//	BufferedWriter bw = new BufferedWriter(new FileWriter(new File("ghatiya")));
+		//	bw.write(content);
+		//	bw.close();
+			
+			Pattern removeTag=Pattern.compile("((: ){1,}:)|(:,)|( : )|( :)|(: )|(:[A-Za-z]{1,})");
+			//Matcher m;
+			m=removeTag.matcher(":[CD JJ : CD]:[1]:10.3321:[NN, :]:[1:IPCALL NN NN NN NN NN]:[1]:[: : :]:[1]:14.4640:[: : : :]:[1]:14.4640:4:[NNP NNP, JJ NN, : :]");
+			line =m.replaceAll(" ");
+			System.out.println("line "+line);
+			
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		
 		
 		
 	}
 	
 	public static void Stringmaker (String make){
 		make="mansi";
+	}
+	public static <K, V extends Comparable<V>> Map<K, V> sortByValues(final Map<K, V> map) {
+		Comparator<K> valueComparator =  new Comparator<K>() {
+		    public int compare(K k1, K k2) {
+		        int compare = map.get(k2).compareTo(map.get(k1));
+		        if (compare == 0) return 1;
+		        else return compare;
+		    }
+		};
+		Map<K, V> sortedByValues = new TreeMap<K, V>(valueComparator);
+		sortedByValues.putAll(map);
+		return sortedByValues;
+	}
+	
+ public static Vector<String> getNGrams(String phrase) {
+		// TODO Auto-generated method stub
+	Vector <String> list = new Vector<String> ();
+	String split[]= phrase.split(" ");
+	StringBuffer sb = new StringBuffer();
+	
+	for(int j=0;j<split.length-1;j++)
+	{
+		sb.append(split[j]+" ");
+		for(int i=1;i<3;i++) //trigrams
+		{
+			if(j+i<split.length)
+			{
+				sb.append(split[j+i]+" ");
+				list.add(sb.toString());
+			}
+			
+		}
+		sb.replace(0, sb.length(), "");
+	}
+	
+	return list;
 	}
 
 }

@@ -5,6 +5,8 @@ package hadoop;
 import java.io.IOException;
 
 import java.io.File;
+import java.util.TreeMap;
+import java.util.Vector;
 
 
 
@@ -23,6 +25,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import org.apache.lucene.analysis.SimpleAnalyzer;
+import org.apache.lucene.analysis.WhitespaceAnalyzer;
 
 
 import org.apache.lucene.document.Document;
@@ -40,6 +43,8 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
+import similarity.checkOverlap;
+
 public class executeQuery {
 
 	public static class Map extends Mapper<Object, Text, Text, Text> {
@@ -48,11 +53,14 @@ public class executeQuery {
 		IndexReader reader;
 		Searcher searcher;
 		//SnowballAnalyzer sa;
-		SimpleAnalyzer sa;
+		WhitespaceAnalyzer sa;
 		QueryParser abst;
 		QueryParser desc;
 		QueryParser claim;
+		QueryParser withoutField;
 		MultiFieldQueryParser mfq;
+		boolean foundIndex;
+		//TreeMap<String, Vector<String>> relList;
 		public void setup(Mapper.Context context) {
 
 			try {
@@ -62,21 +70,41 @@ public class executeQuery {
 				{
 					//System.out.println("In initialization of reader");
 					//reader =IndexReader.open(FSDirectory.open(new File("/home/mansi/pindex")));
-					reader =IndexReader.open(FSDirectory.open(new File("/home/hdev/pindex")));
-					searcher = new IndexSearcher(reader);
+					File f =new File("/home/hadoop/patent_index/withoutFields/patIndex/");
+					File f1 = new File("/home1/hadoopdata/patent_index/withoutFields/patIndex/");
+					if(f.exists())
+					{
+						reader =IndexReader.open(FSDirectory.open(f));
+						searcher = new IndexSearcher(reader);
+						foundIndex=true;
+					}
+					else if (f1.exists())
+					{
+						reader =IndexReader.open(FSDirectory.open(f1));
+						searcher = new IndexSearcher(reader);
+						foundIndex=true;
+					}
+					else 
+					{
+						System.out.println("Index not there");
+						foundIndex=false;
+					}
+
 				}
 				//System.out.println("PATH IS "+job.get("map.input.file"));
 				//if(sa==null && desc==null && claim==null && abst==null)
 				//{
-					System.out.println("In initialization of parsers");
-					//sa = new SnowballAnalyzer(Version.LUCENE_CURRENT,"English");
-					sa = new SimpleAnalyzer();
-					abst=new QueryParser(Version.LUCENE_CURRENT,"abst", sa);
-					desc=new QueryParser(Version.LUCENE_CURRENT,"desc", sa);
-					claim=new QueryParser(Version.LUCENE_CURRENT,"claim", sa);
-						String fields [] ={"abst","desc","claim"};
-					mfq = new MultiFieldQueryParser(Version.LUCENE_CURRENT,fields, sa);
-
+				System.out.println("In initialization of parsers");
+				//sa = new SnowballAnalyzer(Version.LUCENE_CURRENT,"English");
+				sa = new WhitespaceAnalyzer();
+				abst=new QueryParser(Version.LUCENE_CURRENT,"abst", sa);
+				desc=new QueryParser(Version.LUCENE_CURRENT,"desc", sa);
+				claim=new QueryParser(Version.LUCENE_CURRENT,"claim", sa);
+				String fields [] ={"abst","desc","claim"};
+				mfq = new MultiFieldQueryParser(Version.LUCENE_CURRENT,fields, sa);
+				withoutField = new QueryParser(Version.LUCENE_CURRENT,"content",sa);
+				//		relList=checkOverlap.readRel(new File("/home/hdev/rels.b"));
+				//System.out.println("list size "+relList.size());
 				//}
 				BooleanQuery.setMaxClauseCount(Integer.MAX_VALUE);
 
@@ -92,88 +120,120 @@ public class executeQuery {
 		public void map(Object key, Text value, Context context) 
 		throws IOException, InterruptedException {
 
+			String line=null;
 			try {
 				//System.out.println("In map");
 				int count=0;
 				String split [];
-				String line = value.toString();
+				line = value.toString();
 				//System.out.println("line "+line);
 				Query query=null;
-				if(line.indexOf(":")==-1)
+				if (foundIndex)
 				{
-				//	System.out.println("Damned");
-					split=line.split("\t");
-					String title;
-					if(split!=null && split.length==4)
+					if(line.indexOf(":")==-1 && line.length()>2)
 					{
-						if (line.startsWith("desc"))
-							query=desc.parse(split[split.length-1]);
-						else if(line.startsWith("claim"))
-							query=claim.parse(split[split.length-1]);
-						else if(line.startsWith("abstract"))
-							query=abst.parse(split[split.length-1]);
-						//System.out.println("Searching for "+split[2]);
+						//	System.out.println("Damned");
+						split=line.split("\t");
+						String title;
+						
+						query=withoutField.parse(split[split.length-1]);
 						if(query!=null && searcher!=null)
 						{
-							TopDocs hits = searcher.search(query, 1000);
-							
+							TopDocs hits = searcher.search(query,1000); //Integer.MAX_VALUE);
+
 							if(hits.totalHits>1000)
 								count=1000;
 							else
-								count=hits.totalHits;	
-							
+								count=hits.totalHits;
+							//count=hits.totalHits;
+
 							ScoreDoc sd [] = hits.scoreDocs; 
-							
+
 							for(int j=0;j<count;j++)
 							{
 								Document doc = searcher.doc(sd[j].doc);
-							//	System.out.println("For Query patent : "+split[2] + " matching documents "+hits.length());
-						
 								title=doc.get("title");
-								//	riter.write("\n"+Qno+"\t"+round+"\t"+title+"\t"+j+"\t"+hits.score(j)+"\tdemo"+round);
-								//Query no  Type PhraseNo
-								context.write(new Text(split[0]+"_"+split[1]+"_"+split[2]), new Text(split[2]+"\t"+1+"\t"+title+"\t"+j+"\t"+sd[j].score+"\tdemo"));
+								context.write(new Text(split[0]+"_"+split[1]), new Text(split[0]+"\t"+1+"\t"+title+"\t"+j+"\t"+sd[j].score+"\tdemo"));
 							}
 							//	System.out.println("Written to the file");
-
 						}
 
-					}
-				}
-				else if(line.indexOf(":")!=-1 && line.indexOf("\t")!=-1)
-				{
-					split=line.split("\t");
-					query=mfq.parse(split[2]);
-					//System.out.println("In here");
-					String title;
-					if(query!=null && searcher!=null)
-					{
-						TopDocs hits = searcher.search(query, 1000);
-						
-						if(hits.totalHits>1000)
-							count=1000;
-						else
-							count=hits.totalHits;	
-						
-						ScoreDoc sd [] = hits.scoreDocs; 
-						
-						for(int j=0;j<count;j++)
+						/*if(split!=null && split.length==4)
 						{
-							Document doc = searcher.doc(sd[j].doc);
-							title=doc.get("title");
-							//	riter.write("\n"+Qno+"\t"+round+"\t"+title+"\t"+j+"\t"+hits.score(j)+"\tdemo"+round);
-							context.write(new Text(split[0]+"_"+split[1]), new Text(split[0]+"\t"+1+"\t"+title+"\t"+j+"\t"+sd[j].score+"\tdemo"));
-						}
-						//	System.out.println("Written to the file");
+							if (line.startsWith("desc"))
+								query=desc.parse(split[split.length-1]);
+							else if(line.startsWith("claim"))
+								query=claim.parse(split[split.length-1]);
+							else if(line.startsWith("abstract"))
+								query=abst.parse(split[split.length-1]);
+							//System.out.println("Searching for "+split[2]);
+							if(query!=null && searcher!=null)
+							{
+								TopDocs hits = searcher.search(query, 1000);
 
+								if(hits.totalHits>1000)
+									count=1000;
+								else
+									count=hits.totalHits;	
+
+								ScoreDoc sd [] = hits.scoreDocs; 
+
+								for(int j=0;j<count;j++)
+								{
+									Document doc = searcher.doc(sd[j].doc);
+									//	System.out.println("For Query patent : "+split[2] + " matching documents "+hits.length());
+
+									title=doc.get("title");
+									//	riter.write("\n"+Qno+"\t"+round+"\t"+title+"\t"+j+"\t"+hits.score(j)+"\tdemo"+round);
+									//Query no  Type PhraseNo
+									context.write(new Text(split[0]+"_"+split[1]+"_"+split[2]), new Text(split[2]+"\t"+1+"\t"+title+"\t"+j+"\t"+sd[j].score+"\tdemo"));
+								}
+								//	System.out.println("Written to the file");
+							}
+						}*/
 					}
+					else if(line.indexOf(":")!=-1 && line.indexOf("\t")!=-1 && line.length()>2)
+					{
+						split=line.split("\t");
+						query=mfq.parse(split[2]);
+						//System.out.println("Query is"+query.toString());
+						System.out.println("In map");
+						String title;
+						if(query!=null && searcher!=null)
+						{
+							TopDocs hits = searcher.search(query,1000); //Integer.MAX_VALUE);
 
+							if(hits.totalHits>1000)
+								count=1000;
+							else
+								count=hits.totalHits;
+							//count=hits.totalHits;
+
+							ScoreDoc sd [] = hits.scoreDocs; 
+
+							for(int j=0;j<count;j++)
+							{
+								Document doc = searcher.doc(sd[j].doc);
+								title=doc.get("title");
+								context.write(new Text(split[0]+"_"+split[1]), new Text(split[0]+"\t"+1+"\t"+title+"\t"+j+"\t"+sd[j].score+"\tdemo"));
+								/*if(relList.containsKey(split[0]))
+								{
+//									riter.write("\n"+Qno+"\t"+round+"\t"+title+"\t"+j+"\t"+hits.score(j)+"\tdemo"+round);
+									if(relList.get(split[0]).contains(title.trim()))
+									context.write(new Text(split[0]+"_"+split[1]), new Text(j+".\t"+split[0]+"\t"+title));
+									//new Text(split[0]+"\t"+1+"\t"+title+"\t"+j+"\t"+sd[j].score+"\tdemo"));
+
+								}*/
+							}
+							//	System.out.println("Written to the file");
+						}
+					}
 				}
-
-
 
 			} catch (Exception ex) {
+				
 				System.out.println("FOUND AN ERROR in map");
+				System.out.println("line "+line);
 				ex.printStackTrace();
 			}
 		}
@@ -207,7 +267,7 @@ public class executeQuery {
 
 		Configuration conf = new Configuration();
 		conf.set("mapred.child.java.opts","-Xmx2000m");
-		conf.set("mapred.task.timeout", "2400000");
+		//conf.set("mapred.task.timeout", "2400000");
 		conf.set( "lucene.index.path", "/home/hdev/pindex" );
 		Job job = new Job(conf, "QueryExecution");
 

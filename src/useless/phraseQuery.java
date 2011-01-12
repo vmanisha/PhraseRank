@@ -33,7 +33,8 @@ import org.apache.lucene.search.Searcher;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
-import RankPhrase.findFeatures;
+import rankPhrase.calFeatures.findFeatures;
+
 
 import util.util;
 

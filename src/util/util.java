@@ -9,6 +9,7 @@ import java.io.StringReader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -168,13 +169,15 @@ public class util {
 		try{
 			BufferedWriter bw = new BufferedWriter(new FileWriter (new File(filename)));
 			Set s=null;
-			if(obj instanceof HashMap || obj instanceof TreeMap)
+			if(obj instanceof HashMap || obj instanceof TreeMap || obj instanceof Map)
 			{
 				if(obj instanceof HashMap)
 					s = ((HashMap)obj).entrySet();
 				else if (obj instanceof TreeMap)
 					s = ((TreeMap)obj).entrySet();	
-
+				else if (obj instanceof Map)
+					s= ((Map)obj).entrySet();
+					
 				Iterator <Map.Entry>i = s.iterator();
 				Map.Entry m ;
 				while (i.hasNext())
@@ -359,7 +362,7 @@ public class util {
 			{
 				f= list.next();
 				System.out.println("file to split "+f.getName());
-				br = new BufferedReader(new FileReader(list.next()));
+				br = new BufferedReader(new FileReader(f));
 				while((line=br.readLine())!=null)
 				{
 					if(line.startsWith("<DOCNO>"))
@@ -541,7 +544,7 @@ public class util {
 		TokenStream ts;
 		Token tok;
 		TermAttributeImpl ati= new TermAttributeImpl();
-		
+		text=util.processForIndex(text);
 		
 		ts=sa.tokenStream("word", new StringReader(text));
 		TermAttribute ta=ts.addAttribute(TermAttribute.class);
@@ -557,10 +560,22 @@ public class util {
 			e.printStackTrace();
 			System.exit(0);
 		}	
-		//if(text.indexOf("java")!=-1)
-		//	System.out.println("tok "+text);
+		//if(tokText.indexOf("have")!=-1)
+		//	System.out.println("text "+text+"tok "+tokText);
 		
-		return text.trim();
+		return tokText.toString().trim();
 	}
 	
+	public static <K, V extends Comparable<V>> Map<K, V> sortByValues(final Map<K, V> map) {
+		Comparator<K> valueComparator =  new Comparator<K>() {
+		    public int compare(K k1, K k2) {
+		        int compare = map.get(k2).compareTo(map.get(k1));
+		        if (compare == 0) return 1;
+		        else return compare;
+		    }
+		};
+		Map<K, V> sortedByValues = new TreeMap<K, V>(valueComparator);
+		sortedByValues.putAll(map);
+		return sortedByValues;
+	}
 }

@@ -18,10 +18,10 @@ import util.util;
 public class read {
 
 	static SnowballAnalyzer en;
-	Vector <String> qList; //List of query files
+	//Vector <String> qList; //List of query files
 	Document pat = null;
 	IndexWriter writer;
-	Vector <String> QDocNo; 
+	//Vector <String> QDocNo; 
 	public read(IndexWriter w)
 	{
 		try{
@@ -50,14 +50,67 @@ public class read {
 	public void loadQuery(File query)
 	{
 		try{
-			qList=util.returnQueryList(new BufferedReader(new FileReader(query)));
-			QDocNo = new Vector ();
+			//qList=util.returnQueryList(new BufferedReader(new FileReader(query)));
+			//QDocNo = new Vector ();
 		}
 		catch(Exception ex)
 		{
 			ex.printStackTrace();
 		}
 		
+		
+	}
+	
+	public void parseWithoutFields(File dir)
+	{
+		//Iterator <File> files = util.makefilelist(dir).iterator();
+		BufferedReader br;
+		String line;
+		String line2;
+	
+	//	Field f;
+		java.util.List l;
+		String docNo;
+		StringBuffer content = new StringBuffer();
+		try{
+		//	while(files.hasNext())
+		//	{
+				br = new BufferedReader(new FileReader (dir));
+				pat = new Document();
+				while((line=br.readLine())!=null)
+				{
+					line2=util.processForIndex(line.toLowerCase());
+					//System.out.println(line2);
+					if(line.startsWith("<PRI-IPC>") || line.startsWith("<PRI-USPC>")) 
+					{
+						line2=line2.replaceAll("\\/", "");
+					}
+					else if (line.startsWith("<DOCNO>"))
+					{
+						docNo=line.substring(line.indexOf(">")+1,line.lastIndexOf("<"));
+						//if(qList.contains(docNo))
+						//	QDocNo.add(docNo+":"+writer.numDocs());
+						pat.add(new Field("path",docNo,Field.Store.YES,Field.Index.NO));
+					}
+					
+					content.append(" "+line2);
+				}
+				
+				pat.add(new Field("content",content.toString(),Field.Store.NO,Field.Index.ANALYZED,Field.TermVector.YES));
+				//System.out.println("got here");
+				content.replace(0,content.length(), "");
+				br.close();
+				
+				//l=pat.getFields();
+				//System.out.println("fields are "+l.size());
+				writer.addDocument(pat, en);
+		
+			//}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
 		
 	}
 	public void parse(File dir)
@@ -87,11 +140,15 @@ public class read {
 					{
 						pat.add(new Field("ipc",line2.replaceAll("\\/", ""),Field.Store.YES,Field.Index.NOT_ANALYZED));
 					}
+					else if(line.startsWith("<PRI-USPC>"))
+					{
+						pat.add(new Field("uspc",line2.replaceAll("\\/", ""),Field.Store.YES,Field.Index.NOT_ANALYZED));
+					}
 					else if (line.startsWith("<DOCNO>"))
 					{
 						docNo=line.substring(line.indexOf(">")+1,line.lastIndexOf("<"));
-						if(qList.contains(docNo))
-							QDocNo.add(docNo+":"+writer.numDocs());
+						//if(qList.contains(docNo))
+						//	QDocNo.add(docNo+":"+writer.numDocs());
 						pat.add(new Field("title",docNo,Field.Store.YES,Field.Index.NOT_ANALYZED));
 						pat.add(new Field("path",docNo,Field.Store.YES,Field.Index.NO));
 					}
@@ -120,7 +177,7 @@ public class read {
 				//content.replace(0,content.length(), "");
 				br.close();
 				
-				l=pat.getFields();
+				//l=pat.getFields();
 				//System.out.println("fields are "+l.size());
 				writer.addDocument(pat, en);
 		
@@ -133,9 +190,9 @@ public class read {
 		
 	}
 	
-	public void writeQDocList(String filename)
-	{
-		util.writeText(QDocNo, filename);
-	}
+	//public void writeQDocList(String filename)
+	//{
+	//	util.writeText(QDocNo, filename);
+	//}
 
 }

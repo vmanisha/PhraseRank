@@ -22,6 +22,7 @@ import org.apache.hadoop.mapreduce.Reducer.Context;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.lucene.analysis.SimpleAnalyzer;
+import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryParser.MultiFieldQueryParser;
@@ -43,7 +44,8 @@ public class executeEach {
 		IndexReader reader;
 		Searcher searcher;
 		//SnowballAnalyzer sa;
-		SimpleAnalyzer sa;
+		//SimpleAnalyzer sa;
+		WhitespaceAnalyzer sa;
 		QueryParser abst;
 		QueryParser desc;
 		QueryParser claim;
@@ -65,7 +67,7 @@ public class executeEach {
 				//{
 				System.out.println("In initialization of parsers");
 				//sa = new SnowballAnalyzer(Version.LUCENE_CURRENT,"English");
-				sa = new SimpleAnalyzer();
+				sa = new WhitespaceAnalyzer();
 				abst=new QueryParser(Version.LUCENE_CURRENT,"abst", sa);
 				desc=new QueryParser(Version.LUCENE_CURRENT,"desc", sa);
 				claim=new QueryParser(Version.LUCENE_CURRENT,"claim", sa);

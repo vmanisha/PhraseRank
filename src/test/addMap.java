@@ -36,9 +36,9 @@ public class addMap {
 			
 			while((line=br.readLine())!=null)
 			{
-				if(line.length()>1)
+				if(line.length()>1 && line.indexOf("=")==-1)
 				{
-					tot+=Float.parseFloat(line.substring(line.indexOf(" ")));
+					tot+=Float.parseFloat(line.substring(line.lastIndexOf("\t")));
 					lineNo++;
 				}
 				
@@ -50,6 +50,10 @@ public class addMap {
 			// TODO: handle exception
 			e.printStackTrace();
 		}
+		
+		//tf-idf The average is 0.04050101
+		//Map 20 20 -- > The average is 0.040532995
+		
 	}
 
 }

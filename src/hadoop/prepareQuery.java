@@ -13,9 +13,10 @@ import java.util.Vector;
 import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
 import org.apache.lucene.queryParser.MultiFieldQueryParser;
 
+import rankPhrase.testTrain.prepareTopPhraseQuery;
+
 import useless.phraseQuery;
 
-import RankPhrase.prepareTopPhraseQuery;
 
 
 
@@ -155,12 +156,12 @@ public class prepareQuery {
 							rankList = new BufferedReader(new FileReader(inputCheck));
 							ptp.loadPhrases(br, rankList);
 							//phQ.loadPhrases(br);
-							size=ptp.getPhraseListSize();
+							size=36;//ptp.getPhraseListSize();
 							
 							//size=phQ.getPhraseListSize();
-							if(size>100)
-							size=100; //make a query maximum with 100 phrases
-							for(int ctr=1;ctr<size;ctr++)
+							//if(size>100)
+							//size=41; //make a query maximum with 100 phrases
+							for(int ctr=5;ctr<size;ctr=ctr+5)
 							{
 								Query.append("\n"+Qno+"\t"+ctr+"\t"+ptp.combinePhrases(ctr));
 								//Query.append("\n"+Qno+"\t"+ctr+"\t"+phQ.combinePhrases(ctr));
