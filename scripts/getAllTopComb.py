@@ -35,8 +35,8 @@ def checkOutput(relFile,outputFile): #relFile == relevance file outputFile = fil
 	for line in listo:
 		if line !="":		
 			split=line.split("\t")
-			num=split[2]
-			pat=split[3]
+			num=split[0]#num=split[2] #query number 0001
+			pat=split[1]#pat=split[3] #output patent
 			#print split
 			if (num in relDict):
 				relList=relDict[num]
@@ -60,12 +60,12 @@ def checkOutput(relFile,outputFile): #relFile == relevance file outputFile = fil
 			split=line.split("\t")
 			num=split[0]
 			pat=split[2]
-			if num not in score:
-				#print num				
-				score[num]=0
-				actualList[num]=0
-			actualList[num] += 1
-			if num in relDict:				
+			if num in relDict:			
+				if num not in score:
+					#print num				
+					score[num]=0
+					actualList[num]=0
+				actualList[num] += 1
 				relList=relDict[num]
 				'''print relList	
 				print pat
@@ -78,13 +78,34 @@ def checkOutput(relFile,outputFile): #relFile == relevance file outputFile = fil
 	#print score;	
 	for k, v in score.iteritems():
 		print k, v, actualList[k]
+	listf.close()
+	outf.close()
 
+	
+def findPercentage(relFile): #results containing the patno no_retr no_total
+	listf=open(relFile,"r")
+	data=listf.read()
+	relList=data.split("\n")
+	score={}
+	for result in relList:
+		if result!="" and result[0]!="#":
+			split=result.split(" ")
+			#print split
+			percent=int((float(split[1])/float(split[2]))*100)
+			if percent not in score:
+				score[percent]=0;
+			score[percent] += 1
+	items=score.keys()
+	items.sort()
+	for k in items:
+		print k, score[k]#, actualList[k]
+	
 	
 	
 def main(argv):
 	#findTopQuery(argv[1],argv[2],argv[3])
-	checkOutput(argv[1],argv[2])
-	
+	#checkOutput(argv[1],argv[2]) #relFile outputFile
+	findPercentage(argv[1])
 
 if __name__ == "__main__":
 	main(sys.argv);	
