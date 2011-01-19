@@ -113,7 +113,7 @@ public class rankPhraseIDF {
 	 */
 	public static void main(String args[])
 	{
-		ArrayList <File> list = util.makefilelist(new File(args[0]));
+		ArrayList <File> list = util.makefilelist(new File(args[0]), new ArrayList<File>());
 		Iterator i = list.iterator();
 		String type=null;
 		if(args[3].equals("idf"))

@@ -94,7 +94,7 @@ public class similarityCorpus {
 	public void LoadDataSet (File dir)
 	{
 		
-		ArrayList <File> obj =util.makefilelist(dir);
+		ArrayList <File> obj =util.makefilelist(dir, new ArrayList<File>());
 		Iterator <File> i = obj.iterator();
 		File f ;
 		ObjectInputStream f1;
@@ -519,7 +519,7 @@ public class similarityCorpus {
 	}
 	public static void main (String args [])
 	{
-		ArrayList <File> qfile=util.makefilelist(new File(args[0])); //query folder
+		ArrayList <File> qfile=util.makefilelist(new File(args[0]), new ArrayList<File>()); //query folder
 		similarityCorpus sc= new similarityCorpus(new File(args[2])); //stop word.txt
 		sc.primaryPath=args[1]; // path of the dataset
 		sc.parse_sol(new File(args[4])); //relevance judgements

@@ -53,7 +53,7 @@ public class buildSIndex {
 		}
 		public static void main (String args [])
 		{
-			ArrayList  <File> flist = util.makefilelist(new File(args[0]));
+			ArrayList  <File> flist = util.makefilelist(new File(args[0]), new ArrayList<File>());
 			Iterator <File>i=flist.iterator();
 			File f;
 			while(i.hasNext()){

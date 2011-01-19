@@ -63,9 +63,7 @@ public class findFeatures {
 	DefaultSimilarity similarity;
 	static Vector <String> stop;
 	util util;
-	static Pattern p=Pattern.compile("[A-Za-z]");
-	static Matcher m;
-
+	
 	public findFeatures(IndexReader ir,IndexSearcher is,DefaultSimilarity sim,String stop1,util util1)
 	{
 		reader=ir;
@@ -221,7 +219,7 @@ public class findFeatures {
 			while(iphrase.hasNext())
 			{
 				phrase=iphrase.next();
-				if(phraseList.contains(phrase) && notNumber(phrase) && phrase.length()<120)
+				if(phraseList.contains(phrase) && util.notNumber(phrase) && phrase.length()<120)
 				{
 					phrasel= phrase.split(" ");
 					for(int i=0;i<phrasel.length;i++)
@@ -375,7 +373,7 @@ public class findFeatures {
 
 			if (f.isDirectory())
 			{
-				ArrayList list = util.makefilelist(f);
+				ArrayList list = util.makefilelist(f,new ArrayList<File>());
 				Collections.sort(list);
 				Iterator<File> i = list.iterator();
 
@@ -439,11 +437,5 @@ public class findFeatures {
 		return text.trim();
 	}
 
-	public static boolean notNumber(String text)
-	{
-		m=p.matcher(text);
-		if(m.find())
-			return true;
-		return false;
-	}
+	
 }

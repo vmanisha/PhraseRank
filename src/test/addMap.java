@@ -33,12 +33,14 @@ public class addMap {
 			String line;
 			float tot=0;
 			int lineNo=0 ;
-			
+			String split[];
 			while((line=br.readLine())!=null)
 			{
 				if(line.length()>1 && line.indexOf("=")==-1)
 				{
-					tot+=Float.parseFloat(line.substring(line.lastIndexOf("\t")));
+					split=line.split("\t");
+					tot+=Float.parseFloat(split[1]);
+					//tot+=Float.parseFloat(line.substring(line.lastIndexOf("\\s")));
 					lineNo++;
 				}
 				

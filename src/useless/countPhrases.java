@@ -44,7 +44,7 @@ public class countPhrases {
 		String field;
 		File f2;
 		try{
-			ArrayList <File> al = util.makefilelist(new File(inputDir));
+			ArrayList <File> al = util.makefilelist(new File(inputDir), new ArrayList<File>());
 			Collections.sort(al);
 			Iterator i = al.iterator();
 			Pattern p = Pattern.compile("\\[.*?\\]",Pattern.MULTILINE|Pattern.DOTALL);

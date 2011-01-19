@@ -17,9 +17,11 @@ public class generateTestTrain {
 	 * @param args[1] --> no of input splits  (ex. 5 splits of [.80--train][.20--test])
 	 * @param args[2] --> SVM Feature File
 	 * @param args[3] --> folder containing the scores of techniques (tf, idf , tf-idf , etc)
+	 * @param args[4] --> type "rank" or "lnknet"
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		String line=null;
 		try{
 			
 			Vector <Integer> al = new Vector <Integer> ();
@@ -29,18 +31,23 @@ public class generateTestTrain {
 			int trainSize=(int)(0.80*totPat), testSize=totPat-trainSize;
 			
 			//Read the SVM feature file
-			
 			BufferedReader br = new BufferedReader(new FileReader(new File(args[2])));
-			String line;
+			String split [];
 			int patNo;
 			HashMap <Integer,StringBuffer> patData = new HashMap<Integer, StringBuffer> ();
-			String data ;
+			
 			StringBuffer sb;
 			while((line=br.readLine())!=null)
 			{
 				if(line.length()>2)
 				{
-					patNo=Integer.parseInt(line.substring(line.indexOf("qid:")+4,line.indexOf("1:")-1));
+					if(args[4].equals("rank"))
+					{
+						split=line.split(" ");
+						patNo=Integer.parseInt(split[1].substring(4));
+					}
+					else 
+						patNo=Integer.parseInt(line.substring(line.lastIndexOf("#")+1));	
 					//System.out.println("patNo "+patNo);
 					if(patData.containsKey(patNo))
 						patData.put(patNo, patData.get(patNo).append("\n"+line));
@@ -61,11 +68,10 @@ public class generateTestTrain {
 			}
 			
 			//read the scores 
-			/*HashMap <Integer,Float> [] scores;
-			
-			File f2;
-			ArrayList <File>children  = util.util.makefilelist(new File(args[3]));
-			scores = new HashMap [children.size()];
+			ArrayList <File>children  = util.util.makefilelist(new File(args[3]),new ArrayList<File>());
+			HashMap <Integer,Float> [] scores=new HashMap [children.size()];
+			System.out.println("children size "+children.size());
+			String scoreTypes [] = new String [children.size()]; //store type (tf , tf-idf)
 			int no;
 			float score;
 			String line2;
@@ -73,6 +79,7 @@ public class generateTestTrain {
 			{
 				br=new BufferedReader(new FileReader(children.get(i)));
 				scores[i]= new HashMap <Integer,Float>();
+				scoreTypes[i]=children.get(i).getAbsolutePath();
 				while((line=br.readLine())!=null)
 				{
 					//format of 
@@ -82,10 +89,13 @@ public class generateTestTrain {
 					{
 						if(line.indexOf("==>")!=-1) 
 						{
-							no=Integer.parseInt(line.substring(line.indexOf("==>")+3,line.indexOf("<==")));
+							//line.indexOf("==>")+3
+							no=Integer.parseInt(line.substring(line.lastIndexOf("/")+1,line.indexOf("<==")).trim());
 							line2=br.readLine();
 							score=Float.parseFloat(line2.substring(line2.indexOf("\t")));
+							
 							scores[i].put(no, score);
+							//System.out.println(no+" "+score+" "+i +" "+scores[i].get(no));
 						}
 						else
 						{
@@ -96,24 +106,35 @@ public class generateTestTrain {
 						}
 					}
 				}
-				
 			}
-			*/
-				
-			//Collections.shuffle(al);
-			//System.out.println(al);
-			Vector <Integer> list= new Vector <Integer>();
 			
+			Vector <Integer> list= new Vector <Integer>();
 			int strt, end;
+			
+			//initialize the totals to 0
+			float trainTotal[]= new float [scores.length];
+			for(int i=0;i<trainTotal.length;i++)
+				trainTotal[i]=0;
+				
+			float testTotal[]= new float [scores.length];
+			for(int i=0;i<testTotal.length;i++)
+				testTotal[i]=0;
+			
+			
 			for(int i=0;i<noOfSets;i++)
 			{
 				strt=i*testSize;
 				end=strt+trainSize;
-				bw = new BufferedWriter(new FileWriter(new File("train"+i)));
+				bw = new BufferedWriter(new FileWriter(new File("train"+i+".dat")));
 				for(int j=strt;j<end;j++)
 				{
 					System.out.println(al.get(j%totPat));
 					list.add(al.get(j%totPat));
+					for(int k =0;k<trainTotal.length;k++)
+						{
+							if(scores[k].get(al.get(j%totPat))!=null)
+							trainTotal[k]+=scores[k].get(al.get(j%totPat));
+						}
 				}
 				Collections.sort(list);
 				for(int j=0;j<list.size();j++)
@@ -127,8 +148,8 @@ public class generateTestTrain {
 				list.clear();
 				bw.close();
 				
-				bw = new BufferedWriter(new FileWriter(new File("test"+i)));
-				
+								
+				bw = new BufferedWriter(new FileWriter(new File("test"+i+".dat")));
 				for(int j=end;j<end+testSize;j++)
 				{
 					//System.out.println("test "+al.get(j%1000));
@@ -136,6 +157,21 @@ public class generateTestTrain {
 						bw.write(patData.get(al.get(j%totPat)).toString());
 						else 
 					bw.write("\n"+patData.get(al.get(j%totPat)).toString());
+					for(int k =0;k<testTotal.length;k++)
+					{
+						if(scores[k].get(al.get(j%totPat))!=null)
+						testTotal[k]+=scores[k].get(al.get(j%totPat));
+					}
+					
+				}
+				bw.close();
+				
+				bw = new BufferedWriter(new FileWriter(new File("scores"+i)));
+				for(int k =0;k<testTotal.length;k++)
+				{
+					bw.write("\n"+scoreTypes[k]);
+					bw.write("\nTrain Total "+trainTotal[k]+"\tTestTotal "+testTotal[k]);
+					bw.write("\nTrain Avg "+trainTotal[k]/trainSize+"\tTest Avg "+testTotal[k]/testSize);
 				}
 				bw.close();
 			}
@@ -163,6 +199,7 @@ public class generateTestTrain {
 			// TODO: handle exception
 			
 			e.printStackTrace();
+			System.out.println("line "+line);
 		}
 		
 	}

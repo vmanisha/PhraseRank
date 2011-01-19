@@ -19,7 +19,7 @@ public class relationshipExt {
 	public static void main (String args [])
 	{
 		try{
-			ArrayList<File> list = util.makefilelist(new File(args[0]));
+			ArrayList<File> list = util.makefilelist(new File(args[0]),new ArrayList<File>());
 			//System.out.println(list);
 			Iterator <File>i = list.iterator();
 			String line;

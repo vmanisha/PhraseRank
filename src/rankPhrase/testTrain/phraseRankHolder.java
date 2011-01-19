@@ -86,23 +86,23 @@ public class phraseRankHolder {
 	
 	public int positionOfBestPhrase()
 	{
-		if(origRank.size()!=phraseNo.size())
-			System.out.println("For Patent no "+patNo+" orig "+origRank.size()+" phraseInFeatures "+phraseNo.size());
-		System.out.println("For Patent no "+patNo+" best phrase is at  "+phraseNo.indexOf(origRank.get(0)));
+		//if(origRank.size()!=phraseNo.size())
+		//System.out.println("For Patent no "+patNo+" orig "+origRank.size()+" phraseInFeatures "+phraseNo.size());
+		//System.out.println("For Patent no "+patNo+" best phrase is at  "+phraseNo.indexOf(origRank.get(0)));
 		//System.out.println("For Patent no "+patNo+" obest phrase is at "+origRank.indexOf(phraseNo.elementAt(0)));
 		return phraseNo.indexOf(origRank.get(0));
 	}
 	
 	public int positionOfOBestPhrase()
 	{
-		System.out.println("For Patent no "+patNo+" obest phrase is at "+origRank.indexOf(phraseNo.elementAt(0)));
+		//System.out.println("For Patent no "+patNo+" obest phrase is at "+origRank.indexOf(phraseNo.elementAt(0)));
 		return phraseNo.indexOf(origRank.indexOf(phraseNo.elementAt(0)));
 	
 	}
 	
 	public int positionOfWorstPhrase()
 	{
-		System.out.println("For Patent no "+patNo+" worst phrase is at "+phraseNo.indexOf(origRank.lastElement()));
+		//System.out.println("For Patent no "+patNo+" worst phrase is at "+phraseNo.indexOf(origRank.lastElement()));
 		int index= phraseNo.indexOf(origRank.lastElement());
 		if(index==-1)
 			return phraseNo.size();
@@ -134,7 +134,7 @@ public class phraseRankHolder {
 			
 			if(i%5==0)
 			{
-				System.out.println("Prec at "+i+" :"+(pre/(i+1)));
+				//System.out.println("Prec at "+i+" :"+(pre/(i+1)));
 				precision.add(pre/i);
 				//System.out.println("\nRecall at "+i+" :"+(rel/ctr));
 			}
@@ -166,7 +166,7 @@ public class phraseRankHolder {
 			
 			if(i%5==0)
 			{
-				System.out.println("Recall at "+i+" :"+(rel/ctr));
+				//System.out.println("Recall at "+i+" :"+(rel/ctr));
 				recall.add(rel/ctr);
 				
 			}

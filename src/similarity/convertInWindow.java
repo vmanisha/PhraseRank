@@ -49,7 +49,7 @@ public class convertInWindow {
 
 			if (f.isDirectory())
 			{
-				ArrayList list = util.makefilelist(f);
+				ArrayList list = util.makefilelist(f,new ArrayList<File>());
 				Collections.sort(list);
 				Iterator<File> i = list.iterator();
 				Vector <String> words= new Vector <String>();

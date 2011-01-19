@@ -28,7 +28,7 @@ public class arrangeFeatureForSVM {
 	 * @param args[2] -- Features file
 	 * @param args[3] -- No of features - POSTag feature (its not a number)
 	 * @param args[4] -- Output folder
-	 * @param args[5] -- 'rank' --> svm rank format , 'lnknet' --> in classification lnknet format
+	 * @param args[5] -- 'rank' --> svm rank format , 'lnknet' --> in classification lnknet format "libsvm"
 	 * 
 	 *  Format of SVM is -- score , qid:PatentNo , featureNo:featureValue ..
 	 *  Please specify the index of feature with POSTag count  20:[NN, NNS]   21:[23,45] index=21 modify at line #366
@@ -43,11 +43,19 @@ public class arrangeFeatureForSVM {
 	public static void main (String args []) throws IOException
 	{
 		String line ="";
+		//BufferedWriter writeInfo=null;
 		BufferedWriter writeFeatures=null;
+		File output = new File(args[4]);
+		if(output.exists())
+		{
+			System.err.println("the output folder exists ");
+			System.exit(0);
+		}
+
 		try{
-			ArrayList <File> eachPhraseList = util.makefilelist(new File(args[0]));
-			ArrayList <File> orderedByMapList = util.makefilelist(new File(args[1]));
-			ArrayList <File> featurePatentList = util.makefilelist(new File(args[2]));
+			ArrayList <File> eachPhraseList = util.makefilelist(new File(args[0]),new ArrayList<File>());
+			ArrayList <File> orderedByMapList = util.makefilelist(new File(args[1]), new ArrayList<File>());
+			ArrayList <File> featurePatentList = util.makefilelist(new File(args[2]),new ArrayList<File>());
 
 			Collections.sort(eachPhraseList);
 			Collections.sort(orderedByMapList);
@@ -61,6 +69,13 @@ public class arrangeFeatureForSVM {
 				formatType=1;
 			else if (args[5].equals("lnknet"))
 				formatType=0;
+			else if (args[5].equals("weka"))
+				formatType=2;
+			/*else if(args[5].equals("libsvm"))
+				{
+					writeInfo= new BufferedWriter(new FileWriter("Info"));
+					formatType=2;
+				}*/
 			else 
 			{	
 				System.err.println("Type isnt corrent, enter \'rank\' or \'lnknet\'");
@@ -77,13 +92,7 @@ public class arrangeFeatureForSVM {
 			posTagList=getPOSAndRest(featurePatentList,minimum,maximum);
 			//System.out.println("the pos tag list "+posTagList.toString());
 
-			File output = new File(args[4]);
-			if(output.exists())
-			{
-				System.err.println("the output folder exists ");
-				System.exit(0);
-			}
-
+			
 			printMinMax(minimum,maximum);
 
 			File f;
@@ -144,7 +153,7 @@ public class arrangeFeatureForSVM {
 					{
 						split= line.split("\t");
 						phrase= split[3].substring(1,split[3].length()-1).trim();
-						phrase=makeNewPhrase(phrase); //remove a single letter or alphabet
+						//phrase=makeNewPhrase(phrase); //remove a single letter or alphabet
 
 						//System.out.println("phrase "+phrase +" " + split[3]);
 						//put the phrase and phrase no in the phraseList , phraseNoList and typeList
@@ -167,12 +176,12 @@ public class arrangeFeatureForSVM {
 				System.out.println("** "+f.getName()+" **");
 				while((line= readOrderedList.readLine())!=null)
 				{
-					if(line.length()>0)
+					if(line.length()>0 && line.indexOf("all")==-1)
 					{
 						//System.out.println("line is "+line.trim() +"number "+line.trim().substring(0,line.indexOf("\t")-1)) ;
 						try{
 							phraseNo = Integer.parseInt(line.substring(0,line.indexOf("\t")).trim());
-							//System.out.println("line "+line +" phrase "+phraseNo);
+							
 							index= phraseNoList.indexOf(phraseNo);
 							map=line.substring(line.indexOf("\t")+1);
 
@@ -188,16 +197,27 @@ public class arrangeFeatureForSVM {
 
 									//FOR SVM RANK
 									if(formatType==1)
+									{
 										writeFeatures.write("\n"+map+" "+featureList.get(fphraseList.indexOf(phrase))+" #"+phraseNo+"#"+phrase);
-									else {	
+									}
+									else if(formatType==0){	
 										//FOR SVM CLASSIFIER
 										if(Float.parseFloat(map) > 0)
-											writeFeatures.write("\n"+1+" "+featureList.get(fphraseList.indexOf(phrase))+" #"+f.getName()+" #"+phraseNo+"#"+phrase);	
+											writeFeatures.write("\n"+1+" "+featureList.get(fphraseList.indexOf(phrase))+" #"+phraseNo+"#"+phrase+" #"+f.getName());	
 										else 
-											writeFeatures.write("\n"+0+" "+featureList.get(fphraseList.indexOf(phrase))+" #"+f.getName()+" #"+phraseNo+"#"+phrase);
+											writeFeatures.write("\n"+0+" "+featureList.get(fphraseList.indexOf(phrase))+" #"+phraseNo+"#"+phrase+" #"+f.getName());
 									}	
+									else
+									{
+										if(Float.parseFloat(map) > 0)
+											writeFeatures.write("\n"+1+" "+featureList.get(fphraseList.indexOf(phrase))+" #"+phraseNo+"#"+phrase);
+											else
+											writeFeatures.write("\n"+(-1)+" "+featureList.get(fphraseList.indexOf(phrase))+" #"+phraseNo+"#"+phrase);	
+										//writeInfo.write("\n"+phraseNo+"#"+phrase+"#"+f.getName());
+									}
 									phraseWritten.add(phrase);
 								}
+								
 							}
 							//else
 							//	System.out.println("phrase not present "+phraseNo);
@@ -205,6 +225,7 @@ public class arrangeFeatureForSVM {
 						catch (Exception e) {
 							// TODO: handle exception
 							e.printStackTrace();
+							System.out.println("line "+line );
 						}
 					}
 				}
@@ -223,7 +244,7 @@ public class arrangeFeatureForSVM {
 
 	}
 
-	private static String makeNewPhrase(String phrase) {
+/*	private static String makeNewPhrase(String phrase) {
 		// TODO Auto-generated method stub
 		String [] split=phrase.split(" ");
 		StringBuffer sb = new StringBuffer();
@@ -234,7 +255,7 @@ public class arrangeFeatureForSVM {
 
 		return sb.toString().trim();
 	}
-
+*/
 	private static void printMinMax(Double[] minimum, Double[] maximum) {
 		// TODO Auto-generated method stub
 
@@ -292,16 +313,17 @@ public class arrangeFeatureForSVM {
 											posTags.add(split2[k].trim());
 									}
 								}
-
 							}
 							else 
 							{
 								try{
-									value=Math.log(Double.parseDouble(split[j])+1);
+									value=Double.parseDouble(split[j]);
 									if(minimum[j]>value)
 									{
 										if(value==0)
-											System.out.println("val 0. "+j );
+										{
+											System.out.println("val 0. "+j +"line"+ line);
+										}
 										//System.out.println(" min of "+j+" is "+value +"for line "+line);
 										minimum[j]=value;
 									}
@@ -328,6 +350,7 @@ public class arrangeFeatureForSVM {
 			// TODO: handle exception
 
 			e.printStackTrace();
+			System.exit(0);
 		}
 
 		return posTags;
@@ -354,7 +377,7 @@ public class arrangeFeatureForSVM {
 		double value;
 
 		//append the patentName
-		if(formatType==1)
+		if(formatType>0)
 		newFeature.append("qid:"+qId);
 
 		for(int i=1;i<split.length;i++)
@@ -362,30 +385,27 @@ public class arrangeFeatureForSVM {
 			if(split[i].indexOf("[")==-1)
 			{
 				try{
-					//if(i==4)
-					//System.out.println("the old value "+split[i] +" min "+minimum[i]+" max "+maximum[i]);
-					value=Math.log(Double.parseDouble(split[i])+1);
+					value=Double.parseDouble(split[i]);//Math.log(Double.parseDouble(split[i])+1);
+					if(formatType>0)
 					value=(float)(value-minimum[i])/(float)(maximum[i]-minimum[i]);
-					//if(i==4)
-					//System.out.println("new value "+value);
+					
+					
 				}catch (Exception e) {
 					// TODO: handle exception
 					System.out.println("PROBLEM. " +split[i]);
 					value=0;
 				}
-
+				if(formatType>0)
 				newFeature.append(" "+i+":"+df.format(value));
-
-				//for the classifier
-				/*if(i==1)
+				else if(i==1) //FOR THE CLASSIFIER
 				newFeature.append(df.format(value));
 				else
-				newFeature.append(" "+df.format(value));*/
+				newFeature.append(" "+df.format(value));
 
 			}
 			else if(i==20)   //!notNumber(split[i].substring(1,split[i].length()-1)))  No of times the POS tag appears
 			{
-				split2=split[i-1].substring(1,split[i-1].length()-1).split(",");
+				/*split2=split[i-1].substring(1,split[i-1].length()-1).split(",");
 				split3=split[i].substring(1,split[i].length()-1).split(",");
 				try{
 					maxCount=Double.parseDouble(split3[0]);
@@ -398,23 +418,28 @@ public class arrangeFeatureForSVM {
 							maxIndex=k;
 						}
 					}
-					if(split2.length<maxIndex)
-						index=0;
-					else
+					if(maxIndex > 0 && split2.length>=maxIndex )
 						index=posTagList.indexOf(split2[maxIndex]);
+					else 
+						index=posTagList.indexOf(0);
 					//normalize the value of the index
 					index=index/(float)posTagList.size();
+					if(formatType>0)
 					newFeature.append(" "+(i-1)+":"+df.format(index)+" "+i+":"+maxCount);
-
+					else
+						newFeature.append(" "+df.format(index)+" "+maxCount);
+					
 				}
 				catch (Exception e) {
 					// TODO: handle exception
 					e.printStackTrace();
-					/*System.out.println("split 2 "+split[i-1].substring(1,split[i-1].length()-1));
-					System.out.println("Not a number "+split[i].substring(1,split[i].length()-1));*/
+					System.out.println("split 2 "+split[i-1].substring(1,split[i-1].length()-1));
+					System.out.println("Not a number "+split[i].substring(1,split[i].length()-1));
+					if(formatType>0)
 					newFeature.append(" "+(i-1)+":"+df.format(0)+" "+i+":"+maxCount);
-
-				}
+					else
+						newFeature.append(" "+df.format(0)+" "+maxCount);
+				}*/
 				//for classification
 				//newFeature.append(" "+df.format(index)+" "+maxCount);
 			}

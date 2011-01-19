@@ -176,7 +176,7 @@ public class outputForGraph {
 			
 			if(args[0].equals("allinone"))
 			{
-				ArrayList <File> allInOne = util.makefilelist(new File(args[1]));
+				ArrayList <File> allInOne = util.makefilelist(new File(args[1]), new ArrayList<File>());
 				//ArrayList <File> oneInOne = util.makefilelist(new File(args[1]));
 				//String landmark;
 				Collections.sort(allInOne);
@@ -214,7 +214,7 @@ public class outputForGraph {
 			}
 			else 
 			{
-				ArrayList <File> allInOne = util.makefilelist(new File(args[0]));
+				ArrayList <File> allInOne = util.makefilelist(new File(args[0]), new ArrayList<File>());
 				Collections.sort(allInOne);
 				Iterator<File> i= allInOne.iterator();
 				File f;

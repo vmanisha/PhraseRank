@@ -107,7 +107,7 @@ public class phraseQuery {
 					}
 					
 					query=util.tokenizeString(sb.toString(),sa);//,stop);
-					if(query.length()>2)
+					if(query.length()>2 && !field.contains(query) && util.notNumber(query) && query.length()<120)
 					field.add(query);
 					
 					sb.replace(0, sb.length(),"");
@@ -302,6 +302,7 @@ public class phraseQuery {
 		while(i.hasNext())
 		{
 			query.append("\nabstract\t"+ctr+"\t"+Qno+"\t\""+i.next()+"\"");
+			//query.append("\n"+Qno+"\t"+ctr+"\t\""+i.next()+"\"");
 			ctr++;
 		}
 
@@ -309,6 +310,7 @@ public class phraseQuery {
 		while(i.hasNext())
 		{
 			query.append("\ndesc\t"+ctr+"\t"+Qno+"\t\""+i.next()+"\"");
+			//query.append("\n"+Qno+"\t"+ctr+"\t\""+i.next()+"\"");
 			ctr++;
 		}
 
@@ -316,6 +318,7 @@ public class phraseQuery {
 		while(i.hasNext())
 		{
 			query.append("\nclaim\t"+ctr+"\t"+Qno+"\t\""+i.next()+"\"");
+			//query.append("\n"+Qno+"\t"+ctr+"\t\""+i.next()+"\"");
 			ctr++;
 		}
 
@@ -671,7 +674,7 @@ public class phraseQuery {
 		phraseQuery phQ=null;
 		try{
 			phQ= new phraseQuery(n,new BufferedReader(new FileReader (new File(args[3]))));//args[4],args[5]);
-			ArrayList  <File> list = phQ.util.makefilelist(new File (args[1]));
+			ArrayList  <File> list = phQ.util.makefilelist(new File (args[1]), new ArrayList<File>());
 			Collections.sort(list);
 			Iterator  i = list.iterator();
 			IndexReader reader =IndexReader.open(FSDirectory.open(new File(args[2])));

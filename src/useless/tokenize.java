@@ -97,7 +97,7 @@ public class tokenize {
 		tn.parseFile(args[1],"two");
 		 */
 		tokenize tn = new tokenize (new File(args[0])); //stopwords file
-		ArrayList<File> files = util.makefilelist(new File(args[1])); // corpus dir to tokenize
+		ArrayList<File> files = util.makefilelist(new File(args[1]), new ArrayList<File>()); // corpus dir to tokenize
 		Iterator <File> i = files.iterator();
 		String dirname="tokenize";
 		File dir = new File(dirname);

@@ -131,7 +131,7 @@ public class docSimilarity {
 	 */
 	public void findSimilarity(File dir,IndexReader reader)
 	{
-		ArrayList <File> list = util.makefilelist(dir);
+		ArrayList <File> list = util.makefilelist(dir, new ArrayList<File>());
 		Collections.sort(list);
 		Iterator i=list.iterator();
 
@@ -274,7 +274,7 @@ public class docSimilarity {
 	 */
 	public void windowSimilarity(File dir,IndexReader reader,int n)
 	{
-		ArrayList <File> list = util.makefilelist(dir);
+		ArrayList <File> list = util.makefilelist(dir, new ArrayList<File>());
 		Collections.sort(list);
 		Iterator i=list.iterator();
 

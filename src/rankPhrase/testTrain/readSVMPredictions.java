@@ -13,17 +13,18 @@ public class readSVMPredictions {
 	 * @param args [0] == folder where phrases Ranked accding to MAP
 	 * @param args [1] == SVM features file
 	 * @param args [2] == Predictions file 
+	 * @param args [3] == Phrase List (type #no phrase)  
 	 */
 	public static void main(String args [])
 	{
 		try{
-			/*File output = new File ("output");
+			File output = new File ("output");
 			if(output.exists())
 			{
 				System.err.println("output dir exists");
 				System.exit(0);
 			}
-			else output.mkdir();*/
+			else output.mkdir();
 			BufferedReader readSVM = new BufferedReader (new FileReader(new File(args[1])));
 			BufferedReader readPred = new BufferedReader (new FileReader(new File(args[2])));
 			BufferedWriter bw;
@@ -33,17 +34,12 @@ public class readSVMPredictions {
 			int currQno=0;
 			Vector <Integer> phraseNo  = new Vector <Integer>();
 			Vector <Double> phraseScore= new Vector <Double>();
-			//Vector <phraseRankHolder> prh = new Vector <phraseRankHolder>();
 			phraseRankHolder temp=null;
 			String fileName;
 			
-			//float sumTotalOverlap=0;
 			float sumBestPos=0;
 			float sumWorstPos=0;
-			//float sumBest100=0;
 			float sumOBestPos=0;
-			//float sumTop50=0;
-			//float sumBot50=0;
 			float [] prec= new float [10];
 			float [] recall= new float [10];
 			
@@ -55,25 +51,27 @@ public class readSVMPredictions {
 			
 			Vector <Float> prec1,recall1;
 			int count=1;
-			
 			while((line= readSVM.readLine())!=null)
 			{
 				fsplit=line.split("#");
 				ssplit=fsplit[0].split(" ");
 				currQno=Integer.parseInt(ssplit[1].substring(4)); //qid: length =4
-				
+				System.out.println("qid "+ssplit[1] + "curr Qno"+currQno);
 				//send it to the phraseRank holder class
 				if(Qno!=0 && currQno!=Qno)
 				{
-					temp= new phraseRankHolder(Qno,args[0]+"/"+filename(Qno));
 					//add the phrase and score from the prediction file
-					//System.out.println("sending  "+phraseNo.size() +" "+phraseScore.size() +" Qno "+Qno +" "+currQno);
+					temp= new phraseRankHolder(Qno,args[0]+"/"+filename(Qno)); //args[0] --> Ranked accding to map
+					
+					
 					temp.add(phraseNo,phraseScore);
 					temp.sortPhraseByScore();
-					//bw = new BufferedWriter(new FileWriter (new File(output.getAbsolutePath()+"/"+filename(Qno))));
-					//temp.writeTopK(100,bw);
-					//bw.close();
-					System.out.println("*** Query No "+Qno+" *** ");
+					
+					bw = new BufferedWriter(new FileWriter (new File(output.getAbsolutePath()+"/"+filename(Qno))));
+					temp.writeTopK(100,bw);
+					bw.close();
+					
+					//System.out.println("*** Query No "+Qno+" *** ");
 					//get everything to find average
 					//sumTotalOverlap+=temp.findTotalPercentageOverlap();
 					//sumTop50+=temp.findTop50overlap();
@@ -95,10 +93,7 @@ public class readSVMPredictions {
 					phraseScore.clear();
 					count++;
 				}
-				//System.out.println("adding phras no "+Integer.parseInt(split[split.length-1].substring(1).trim()));
-				//System.out.println(line +" split "+fsplit[1] );
 				phraseNo.add(Integer.parseInt(fsplit[1])); //phrase in form #234
-				//System.out.println("the size "+phraseNo.size());
 				line2=readPred.readLine();
 				phraseScore.add(Double.parseDouble(line2));
 				
@@ -106,9 +101,9 @@ public class readSVMPredictions {
 					Qno=currQno;
 				
 			}
-			//bw = new BufferedWriter(new FileWriter (new File(output.getAbsolutePath()+"/"+filename(Qno))));
-			//temp.writeTopK(100,bw);
-			//bw.close();
+			bw = new BufferedWriter(new FileWriter (new File(output.getAbsolutePath()+"/"+filename(Qno))));
+			temp.writeTopK(100,bw);
+			bw.close();
 			
 			System.out.println("*** FINAL OUTPUT ***");
 			System.out.println("Total no of queries "+count);
@@ -117,18 +112,18 @@ public class readSVMPredictions {
 			for(int i =0;i<10;i++)
 			{
 				if(prec[i]>0)
-				System.out.println("Prec @ "+i*5+" : "+prec[i]/count);
+				System.err.println("Prec @ "+i*5+" : "+prec[i]/count);
 			}
 			
 			for(int i =0;i<10;i++)
 			{
 				if(recall[i]>0)
-				System.out.println("Recall @ "+i*5+" : "+recall[i]/count);
+				System.err.println("Recall @ "+i*5+" : "+recall[i]/count);
 			}
 			//System.out.println("Average bot 50 overlap   "+sumBot50/count);
-			System.out.println("Average pos Best phrase  "+sumBestPos/count);
-			System.out.println("Average pos oBest phrase "+sumOBestPos/count);
-			System.out.println("Average pos Worst phrase "+sumWorstPos/count);                                                                  
+			System.err.println("Average pos Best phrase  "+sumBestPos/count);
+			System.err.println("Average pos oBest phrase "+sumOBestPos/count);
+			System.err.println("Average pos Worst phrase "+sumWorstPos/count);                                                                  
 		}
 		catch (Exception e) {
 			// TODO: handle exception

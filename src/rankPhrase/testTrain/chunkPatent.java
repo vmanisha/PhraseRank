@@ -49,7 +49,7 @@ public class chunkPatent {
 	 */
 	public static void main(String args[])
 	{
-		ArrayList <File> al = util.makefilelist(new File(args[0]));
+		ArrayList <File> al = util.makefilelist(new File(args[0]),new ArrayList<File>());
 		Collections.sort(al);
 		Iterator <File> i = al.iterator();
 		BufferedReader br ;
@@ -96,14 +96,11 @@ public class chunkPatent {
 				{
 					if(line.startsWith("<ABST>") || line.startsWith("<SPEC>")||line.startsWith("<CLAIM>") || line.startsWith("<TITLE>"))
 					{
-						//System.out.println("in chunking");
 						bw.write("\n"+line.substring(0,line.indexOf(">")+1));
 						toChunk=line.substring(line.indexOf(">")+1,line.lastIndexOf("<"));
-						//System.out.println("to chunk "+toChunk);
 						sents = sdetector.sentDetect(toChunk);
 						for(int  j=0;j <sents.length;j++)
 						{
-							//System.out.println("SENT "+sents[j]);
 							tokens=tokenizer.tokenize(sents[j]);
 
 							for(int k =0;k<tokens.length;k++)
@@ -112,16 +109,16 @@ public class chunkPatent {
 							taggedSent=tagger.tag(sb.toString());
 							sb.replace(0, sb.length(), "");
 							//remove if u have to chunk data
-						/*	tts = taggedSent.split(" ");
+							tts = taggedSent.split(" ");
 							for(int t=0;t<tts.length;t++)
 							{
-								if(!stop.contains(tts[t].substring(0,tts[t].indexOf("/")).toLowerCase()))
+								//if(!stop.contains(tts[t].substring(0,tts[t].indexOf("/")).toLowerCase()))
 								 sb.append(tts[t]+" ");	
 							}
 							bw.write("\n"+sb.toString().trim());
 							sb.replace(0, sb.length(), "");
-							*/
-							tts = taggedSent.split(" ");
+							
+							/*tts = taggedSent.split(" ");
 							tokens = new String[tts.length];
 							tags = new String[tts.length];
 							for (int ti=0,tn=tts.length;ti<tn;ti++) {

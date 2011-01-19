@@ -11,7 +11,7 @@ public class buildWFMatrix {
 	public static void main (String args[])
 	{
 		wordFieldMatrix wfm = new wordFieldMatrix(new File(args[0]));//stop words
-		ArrayList <File> list = util.makefilelist(new File(args[1])); // corpus
+		ArrayList <File> list = util.makefilelist(new File(args[1]), new ArrayList<File>()); // corpus
 		Iterator<File> i= list.iterator();
 		int count =0;
 		while(i.hasNext())

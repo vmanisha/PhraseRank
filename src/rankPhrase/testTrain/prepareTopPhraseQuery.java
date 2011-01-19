@@ -2,6 +2,9 @@ package rankPhrase.testTrain;
 
 import java.io.BufferedReader;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Vector;
 
 
 
@@ -17,10 +20,10 @@ public class prepareTopPhraseQuery {
 
 	
 	ArrayList <String> finalPhraseArray ; 
-	ArrayList <String> phraseArray=new ArrayList <String> ();
+	HashMap <Integer,String> phraseArray=new HashMap <Integer,String> ();
 	/**
 	 * 
-	 * @param patRead -- Reader for each patent file which has --( type #no "phrase" ) arrangement
+	 * @param patRead -- Reader for each patent file which has --( type #no Qno "phrase" ) arrangement
 	 * @param decMapRead -- Reader for corresponding sorted Map phrase no 
 	 */
 
@@ -32,13 +35,15 @@ public class prepareTopPhraseQuery {
 		try{
 			while((line=patRead.readLine())!=null)
 			{
+				System.out.println("line "+line);
 				split= line.split("\t");
-
+				
 				if(line.length()>1)
 				{
 						if(split[0].equals("abstract"))
 							split[0]="abst";
-						phraseArray.add(split[0]+":"+split[3]);
+						phraseArray.put(Integer.parseInt(split[1]),split[0]+":"+split[3]);
+						//phraseArray.add(split[3]);
 				}
 
 			}
@@ -72,6 +77,51 @@ public class prepareTopPhraseQuery {
 		}
 
 	}
+
+	/*public void loadPhrases(BufferedReader patRead,Vector <Integer> noList)
+	{
+		String line ;
+		String split [];
+		finalPhraseArray = new ArrayList <String> (); 
+		try{
+			while((line=patRead.readLine())!=null)
+			{
+				split= line.split("\t");
+
+				if(line.length()>1)
+				{
+						if(split[0].equals("abstract"))
+							split[0]="abst";
+						phraseArray.put(split[0]+":"+split[3]);
+				}
+			}
+			//int phraseNo;
+			String phrase;
+			Iterator<Integer> i = noList.iterator();
+			int no;
+			while(i.hasNext())
+			{
+				no=i.next();
+				try {
+					phrase=phraseArray.get(no);
+					if(!finalPhraseArray.contains(phrase))
+					finalPhraseArray.add(phrase);	
+					
+				}
+				catch (Exception e) {
+					// TODO: handle exception
+				}
+			}
+			//decMapRead.close();
+
+			phraseArray.clear();
+
+		}catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+
+	}*/
 
 	
 	public String combinePhrases(int k)

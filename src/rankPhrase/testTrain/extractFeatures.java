@@ -13,6 +13,7 @@ public class extractFeatures {
 	 * @param args [1] Non Zero elements
 	 * @param args [2] Zero elements
 	 * @param args [3] Output file 
+	 * @param args [4] type "rank" "lnknet"
 	 * bin/hadoop jar ~/experiment.jar hadoop.executeQuery input output
 	 */
 	public static void main(String[] args) {
@@ -28,6 +29,7 @@ public class extractFeatures {
 
 		int Qno=0 ;
 		int currQno=0;
+		float score=0.0f;
 		try{
 			BufferedReader readSVM = new BufferedReader (new FileReader(new File(args[0])));
 			BufferedWriter writeFeatures= new BufferedWriter(new FileWriter(new File (args[3])));
@@ -35,10 +37,19 @@ public class extractFeatures {
 			{
 				if(line.length()>0)
 				{
+					if(args[4].equals("rank"))
+					{
+						split=line.split(" ");
+						score=Float.parseFloat(split[0]);
+						currQno=Integer.parseInt(split[1].substring(4)); //qid: length =4
+					}
+					else
+					{
+						split=line.split("#");
+						currQno=Integer.parseInt(split[3]);
+						score=Float.parseFloat(line.substring(0,line.indexOf(" ")));
+					}
 					
-					split=line.split(" ");
-					
-					currQno=Integer.parseInt(split[1].substring(4)); //qid: length =4
 
 					//send it to the phraseRank holder class
 					if(Qno!=0 && currQno!=Qno)
@@ -47,9 +58,9 @@ public class extractFeatures {
 						Qno=currQno;
 					}
 
-					if(Float.parseFloat(split[0])>0.0 && nonZero<nzl)
+					if(score>0.0f && nonZero<nzl)
 					{
-						if(args.length==5)
+						if(args.length==6)
 						{
 							//System.out.print(" "+(args[4]+1)+":");
 						/*writeFeatures.write("\n"+line.substring(0,line.indexOf(" "+(Integer.parseInt(args[4])+1)+":"))+
@@ -62,9 +73,9 @@ public class extractFeatures {
 						nonZero++;
 
 					}
-					else if(Float.parseFloat(split[0])==0.0 && zero<zl)
+					else if(score<=0.0f && zero<zl)
 					{
-						if(args.length==5)
+						if(args.length==6)
 						{
 							/*writeFeatures.write("\n"+line.substring(0,line.indexOf(" "+(Integer.parseInt(args[4])+1)+":"))+
 									" "+line.substring(line.indexOf("#")));*/

@@ -384,7 +384,7 @@ public class threadPhraseQuery implements Runnable{
 			int n= Integer.parseInt(args[args.length-1]);
 			int noThreads=4;
 			
-			ArrayList  <File> list = util.makefilelist(new File (args[1]));
+			ArrayList  <File> list = util.makefilelist(new File (args[1]), new ArrayList<File>());
 			Collections.sort(list);
 			//Iterator  i = list.iterator();
 			int strt,end;

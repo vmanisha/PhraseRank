@@ -33,6 +33,9 @@ import org.apache.lucene.util.Version;
 
 public class util {
 
+	static Pattern p=Pattern.compile("[A-Za-z]");
+	static Matcher m;
+
 	public static void printResultSet(TreeMap resultset,ArrayList reljd)
 	{
 		List fmap ;
@@ -107,19 +110,18 @@ public class util {
 
 	}
 
-	public static ArrayList <File>  makefilelist(File dirpath)
+	public static ArrayList <File>  makefilelist(File dirpath,ArrayList <File> filenames)
 	{
-		ArrayList <File> filenames= new ArrayList <File>();
+		//ArrayList <File> filenames= new ArrayList <File>();
 		File [] children = dirpath.listFiles();
 		System.out.println("file is "+dirpath.getAbsolutePath());
-		boolean subdir=true;
-
+		
 		if(children!=null)
 		for(int i=0;i<children.length;i++)	
 		{
 			if(children[i].isDirectory())
 			{
-				makefilelist(children[i]);
+				makefilelist(children[i],filenames);
 			}
 			else 
 				filenames.add(children[i]);
@@ -129,7 +131,7 @@ public class util {
 		{
 			filenames.add(dirpath);
 		}
-		
+		//System.out.println("Size filename"+filenames.size());
 		return filenames;
 	}
 
@@ -300,7 +302,7 @@ public class util {
 	
 	public static void splitCorpus(String dir,File outDir)
 	{
-		Iterator <File> list= util.makefilelist(new File(dir)).iterator();
+		Iterator <File> list= util.makefilelist(new File(dir),new ArrayList<File>()).iterator();
 		BufferedReader br ;
 		BufferedWriter bw=null ;
 		String no;
@@ -348,7 +350,7 @@ public class util {
 	}
 	public static void splitCorpusWithTags(File dir,File outDir)
 	{
-		Iterator <File> list= util.makefilelist(dir).iterator();
+		Iterator <File> list= util.makefilelist(dir,new ArrayList<File>()).iterator();
 		
 		BufferedReader br ;
 		BufferedWriter bw=null ;
@@ -577,5 +579,13 @@ public class util {
 		Map<K, V> sortedByValues = new TreeMap<K, V>(valueComparator);
 		sortedByValues.putAll(map);
 		return sortedByValues;
+	}
+	
+	public static boolean notNumber(String text)
+	{
+		m=p.matcher(text);
+		if(m.find())
+			return true;
+		return false;
 	}
 }

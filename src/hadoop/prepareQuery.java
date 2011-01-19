@@ -38,7 +38,7 @@ public class prepareQuery {
 	public static void main(String args[])
 	{
 		try {
-			ArrayList  <File> list = util.util.makefilelist(new File (args[1]));
+			ArrayList  <File> list = util.util.makefilelist(new File (args[1]),new ArrayList<File>());
 			BufferedReader br ;
 			String Qno;
 			Collections.sort(list);
@@ -110,7 +110,7 @@ public class prepareQuery {
 			else if(args[0].equals("eachPhrase")) 
 			{
 				outputDir = createOutDir(args[2]+args[0]); //output dir
-				while(i.hasNext())
+				while(i.hasNext())//phrase list
 				{
 						Qno=null;
 						f=(File)i.next();
@@ -138,10 +138,8 @@ public class prepareQuery {
 				BufferedReader rankList;
 				prepareTopPhraseQuery ptp= new prepareTopPhraseQuery();
 				
-				int size;
-				StringBuffer Query= new StringBuffer();
 				File inputCheck=null;
-				while(i.hasNext())
+				while(i.hasNext())//phrase list
 				{
 						Qno=null;
 						f=(File)i.next();
@@ -156,32 +154,14 @@ public class prepareQuery {
 							rankList = new BufferedReader(new FileReader(inputCheck));
 							ptp.loadPhrases(br, rankList);
 							//phQ.loadPhrases(br);
-							size=36;//ptp.getPhraseListSize();
-							
-							//size=phQ.getPhraseListSize();
-							//if(size>100)
-							//size=41; //make a query maximum with 100 phrases
-							for(int ctr=5;ctr<size;ctr=ctr+5)
-							{
-								Query.append("\n"+Qno+"\t"+ctr+"\t"+ptp.combinePhrases(ctr));
-								//Query.append("\n"+Qno+"\t"+ctr+"\t"+phQ.combinePhrases(ctr));
-								//System.out.println("Recieved query is "+mfq.parse(ptp.combinePhrases(ctr)).toString());
-							}
-							bw= new BufferedWriter(new FileWriter(new File(outputDir+"/"+Qno)));
-							bw.write(Query.toString());
-							bw.close();
+							makeQuery(Qno, outputDir.getAbsolutePath(), ptp);
 							br.close();
 							rankList.close();
-							
 							//phQ.clearAll();
-							Query.replace(0, Query.length(), "");
+							//Query.replace(0, Query.length(), "");
 						}
-						
 				}		
-				
 			}
-			
-
 		}
 		catch (Exception e) {
 			// TODO: handle exception
@@ -200,4 +180,34 @@ public class prepareQuery {
 		outputDir.mkdir();
 		return outputDir;
 	}
+	
+	public static void makeQuery(String Qno,String outputDir,prepareTopPhraseQuery ptp)
+	{
+		int size;
+		StringBuffer Query= new StringBuffer();
+		size=36;//ptp.getPhraseListSize();
+		
+		//size=phQ.getPhraseListSize();
+		//if(size>100)
+		//size=41; //make a query maximum with 100 phrases
+		for(int ctr=5;ctr<size;ctr=ctr+5)
+		{
+			Query.append("\n"+Qno+"\t"+ctr+"\t"+ptp.combinePhrases(ctr));
+			//Query.append("\n"+Qno+"\t"+ctr+"\t"+phQ.combinePhrases(ctr));
+			//System.out.println("Recieved query is "+mfq.parse(ptp.combinePhrases(ctr)).toString());
+		}
+		try {
+			BufferedWriter bw= new BufferedWriter(new FileWriter(new File(outputDir+"/"+Qno)));
+			
+			bw.write(Query.toString());
+			bw.close();
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		
+	
+	}
+	
 }
