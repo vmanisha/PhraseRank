@@ -35,7 +35,7 @@ public class prepareTopPhraseQuery {
 		try{
 			while((line=patRead.readLine())!=null)
 			{
-				System.out.println("line "+line);
+				//System.out.println("line "+line);
 				split= line.split("\t");
 				
 				if(line.length()>1)
@@ -43,6 +43,7 @@ public class prepareTopPhraseQuery {
 						if(split[0].equals("abstract"))
 							split[0]="abst";
 						phraseArray.put(Integer.parseInt(split[1]),split[0]+":"+split[3]);
+						System.out.println("putting "+split[1]+" "+split[0]+":"+split[3]);
 						//phraseArray.add(split[3]);
 				}
 
@@ -52,15 +53,20 @@ public class prepareTopPhraseQuery {
 			while((line=decMapRead.readLine())!=null)
 			{
 				split= line.split("\\s+");
-				//System.out.println("Phrase no  "+split[1]);
+			
 				try {
 					if(split.length==3)
 					phraseNo=Integer.parseInt(split[1]);
 					else 
 					phraseNo=Integer.parseInt(split[0]);	
 					phrase=phraseArray.get(phraseNo);
+					
+					
 					if(!finalPhraseArray.contains(phrase))
-					finalPhraseArray.add(phrase);	
+					{
+						finalPhraseArray.add(phrase);
+						System.out.println("Phrase no  "+split[0]);
+					}
 					
 				}
 				catch (Exception e) {
@@ -141,7 +147,7 @@ public class prepareTopPhraseQuery {
 		
 		//}
 
-		for(int i=2;i<finalPhraseArray.size() && ctr <=k;i++)
+		for(int i=1;i<finalPhraseArray.size() && ctr <=k;i++)
 		{
 			//temp=i.next();
 			//System.out.println("temp "+temp);

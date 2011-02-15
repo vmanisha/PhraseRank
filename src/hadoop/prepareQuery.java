@@ -65,10 +65,10 @@ public class prepareQuery {
 					phQ.extractNPhrases(br);
 					if( Qno!=null)
 					{
-						query=phQ.returnAllQueryString(Qno,"all");
-						bw= new BufferedWriter(new FileWriter(new File(outputDir+"/"+Qno)));
-						bw.write(query);
-						bw.close();
+						//query=phQ.returnAllQueryString(Qno,"all");
+						//bw= new BufferedWriter(new FileWriter(new File(outputDir+"/"+Qno)));
+						//bw.write(query);
+						//bw.close();
 						phQ.clearAll();
 					}
 					br.close();
@@ -93,13 +93,13 @@ public class prepareQuery {
 						//send the Reader to the function 
 						br = new BufferedReader(new FileReader(f));
 						//phQ.extractKPhrases(br, ctr);
-						phQ.extractKPhrasesNC(br, ctr);
+						//phQ.extractKPhrasesNC(br, ctr);
 						if( Qno!=null)
 						{
-							query=phQ.returnAllQueryString(Qno,ctr+"");
-							bw= new BufferedWriter(new FileWriter(new File(outputDir+"/"+Qno+"_"+ctr)));
-							bw.write(query);
-							bw.close();
+							//query=phQ.returnAllQueryString(Qno,ctr+"");
+							//bw= new BufferedWriter(new FileWriter(new File(outputDir+"/"+Qno+"_"+ctr)));
+							//bw.write(query);
+							//bw.close();
 							phQ.clearAll();
 						}
 						br.close();

@@ -12,8 +12,10 @@ import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.index.TermDocs;
 import org.apache.lucene.queryParser.MultiFieldQueryParser;
 import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Searcher;
 import org.apache.lucene.search.spans.SpanNearQuery;
@@ -49,6 +51,8 @@ public class SearchIndex {
 			String fields [] ={"abst","desc","claim"};
 			mfq = new MultiFieldQueryParser(Version.LUCENE_CURRENT,fields, sa);
 			System.out.println("Query is "+Query +" new query "+mfq.parse(Query).toString());
+			
+			
 			/*SpanTermQuery w1 = new SpanTermQuery(new Term("abst", "primari")); 
 			SpanTermQuery w2 = new SpanTermQuery(new Term("abst", "copi"));
 			SpanQuery [] clauses = {w1, w2};

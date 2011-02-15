@@ -52,7 +52,15 @@ public class test {
 		System.out.println("ye raha "+line2.substring(line2.indexOf(">")+1,line2.lastIndexOf("<")));
 		
 		System.out.println("Minimum is "+Double.MIN_VALUE +" another "+Double.MIN_NORMAL);
-		
+		Pattern lang=Pattern.compile("(\\[\\[(.*?)\\]\\])|(\\[\\[[a-z]{2}:.*\\]\\])|(\\[(http:).*\\])");
+		Matcher m1=lang.matcher("* [http://www.pen-paper.net/rpgdb.php Pen &amp; Paper] - RPG Database \n "+
+				"* [http://rpg.geekdo.com RPG Geekdō] - RPG Community and database \n [[Category:Horticulture and gardening]] \n[[Category:Permaculture]]\n" +
+				"[[hr:Igre uloga]]\n [[id:Permainan peran]]\n [[ia:Joco de rol]]\n [[is:Spunaspil]] \n[[it:Gioco di ruolo]] "
+			);
+		while(m1.find())
+		{
+			System.out.println("Word "+m1.group());
+		}
 		/*int len=str.length();
 		int i=10;
 		int y=0;

@@ -118,15 +118,16 @@ public class arrangeFeatureForSVM {
 			String map;
 			String phrase;
 
+			System.out.println("feature Patent list "+featurePatentList.size()+"each phrase "+eachPhraseList.size());
+			System.out.println("ordered by map "+orderedByMapList.size());
 			for (j=0;j<eachPhraseList.size();j++)
 			{
+				
 				fphraseList.clear();
 				phraseNoList.clear();
 				phraseWritten.clear();
 				featureList.clear();
 				originalPhraseList.clear();
-
-				//pos=0;
 
 				//Read the features for the phrases that have been queried
 				f=featurePatentList.get(j);
@@ -152,7 +153,8 @@ public class arrangeFeatureForSVM {
 					if(line.length()>1)
 					{
 						split= line.split("\t");
-						phrase= split[3].substring(1,split[3].length()-1).trim();
+						//phrase= split[3].substring(1,split[3].length()-1).trim();
+						phrase= split[2].substring(1,split[2].length()-1).trim();
 						//phrase=makeNewPhrase(phrase); //remove a single letter or alphabet
 
 						//System.out.println("phrase "+phrase +" " + split[3]);
@@ -164,7 +166,7 @@ public class arrangeFeatureForSVM {
 							phraseNoList.add(Integer.parseInt(split[1]));
 						}
 						else 
-							System.out.println("no feat "+split[3]);
+							System.out.println("no feat "+split[2]);
 					}
 				}
 				readEach.close();
@@ -302,7 +304,7 @@ public class arrangeFeatureForSVM {
 						//System.out.println("split lengt "+split.length);
 						for(j=1;j<split.length;j++)
 						{
-							if(split[j].startsWith("["))
+							/*if(split[j].startsWith("["))
 							{
 								if(split[j].indexOf("N")!=-1)
 								{
@@ -314,7 +316,8 @@ public class arrangeFeatureForSVM {
 									}
 								}
 							}
-							else 
+							else */
+							if(!split[j].startsWith("["))
 							{
 								try{
 									value=Double.parseDouble(split[j]);
@@ -343,6 +346,7 @@ public class arrangeFeatureForSVM {
 
 					}
 				}
+				br.close();
 
 			}
 		}
@@ -361,7 +365,7 @@ public class arrangeFeatureForSVM {
 	private static String getNewFeatureVector(String line, Double[] minimum, Double[] maximum,
 			int qId, Vector<String> posTagList) {
 		// TODO Auto-generated method stub
-		DecimalFormat df = new DecimalFormat("0.0000");
+		DecimalFormat df = new DecimalFormat("0.00000");
 		StringBuffer newFeature= new StringBuffer();
 		String split[],split2[],split3[];
 		double maxCount=0;
@@ -382,9 +386,10 @@ public class arrangeFeatureForSVM {
 
 		for(int i=1;i<split.length;i++)
 		{
-			if(split[i].indexOf("[")==-1)
+			if(split[i].indexOf("[")==-1 && (i<5 || i>8))
 			{
 				try{
+					//System.out.println("came here");
 					value=Double.parseDouble(split[i]);//Math.log(Double.parseDouble(split[i])+1);
 					if(formatType>0)
 					value=(float)(value-minimum[i])/(float)(maximum[i]-minimum[i]);

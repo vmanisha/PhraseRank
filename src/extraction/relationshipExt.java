@@ -24,7 +24,7 @@ public class relationshipExt {
 			Iterator <File>i = list.iterator();
 			String line;
 			String field;
-			String reg="(\\[NP [\\w\\/\\s\\-\\(\\)]+?\\])+?\\s\\[VP.+?\\]\\s(\\[NP [\\w\\/\\s\\-]+?\\])+?\\s(\\[PP [\\w\\/\\s\\-]+?\\]\\s\\[NP [\\w\\/\\s\\-]+?\\])*";//[\\s\\,\\:\\/\\-]*?
+			String reg="(\\[NP [\\w\\/\\s\\-\\(\\)]+?\\](\\s)*)+?\\s\\[VP.+?\\]\\s(\\[NP [\\w\\/\\s\\-]+?\\])+?\\s(\\[PP [\\w\\/\\s\\-]+?\\]\\s\\[NP [\\w\\/\\s\\-]+?\\](\\s)*)*";//[\\s\\,\\:\\/\\-]*?
 			Pattern p = Pattern.compile(reg);
 			Matcher m ;
 			while(i.hasNext())

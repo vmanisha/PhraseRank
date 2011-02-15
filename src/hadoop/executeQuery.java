@@ -53,7 +53,7 @@ public class executeQuery {
 		String filename;
 		IndexReader reader;
 		Searcher searcher;
-		//SnowballAnalyzer sa1;
+		SnowballAnalyzer sa1;
 		WhitespaceAnalyzer sa;
 		QueryParser abst;
 		QueryParser desc;
@@ -71,8 +71,8 @@ public class executeQuery {
 				{
 					//System.out.println("In initialization of reader");
 					//reader =IndexReader.open(FSDirectory.open(new File("/home/mansi/pindex")));
-					File f =new File("/home/hadoop/patent_index/withFields/patIndex/");
-					File f1 = new File("/home1/hadoopdata/patent_index/withFields/patIndex/");
+					File f =new File("/home/hadoop/patent_index/withoutFields/patIndex/");
+					File f1 = new File("/home1/hadoopdata/patent_index/withoutFields/patIndex/");
 					if(f.exists())
 					{
 						reader =IndexReader.open(FSDirectory.open(f));
@@ -96,7 +96,7 @@ public class executeQuery {
 				//if(sa==null && desc==null && claim==null && abst==null)
 				//{
 				System.out.println("In initialization of parsers");
-				//sa1 = new SnowballAnalyzer(Version.LUCENE_CURRENT,"English");
+				sa1 = new SnowballAnalyzer(Version.LUCENE_CURRENT,"English");
 				sa = new WhitespaceAnalyzer();
 				abst=new QueryParser(Version.LUCENE_CURRENT,"abst", sa);
 				desc=new QueryParser(Version.LUCENE_CURRENT,"desc", sa);
@@ -104,7 +104,7 @@ public class executeQuery {
 				String fields [] ={"abst","desc","claim"};
 				mfq = new MultiFieldQueryParser(Version.LUCENE_CURRENT,fields, sa);
 				//withoutField = new QueryParser(Version.LUCENE_CURRENT,"content",sa);
-				withoutField = new QueryParser(Version.LUCENE_CURRENT,"content",sa);
+				withoutField = new QueryParser(Version.LUCENE_CURRENT,"content",sa1);
 				//		relList=checkOverlap.readRel(new File("/home/hdev/rels.b"));
 				//System.out.println("list size "+relList.size());
 				//}
@@ -142,20 +142,21 @@ public class executeQuery {
 						if(query!=null && searcher!=null)
 						{
 							System.out.println("In map" +" "+split[0]);
-							TopDocs hits = searcher.search(query,1000); //Integer.MAX_VALUE);
-
-							if(hits.totalHits>1000)
-								count=1000;
+							TopDocs hits = searcher.search(query,3000); //Integer.MAX_VALUE);
+							
+							if(hits.totalHits>3000)
+								count=3000;
 							else
 								count=hits.totalHits;
 							//count=hits.totalHits;
 
 							ScoreDoc sd [] = hits.scoreDocs; 
-
+							
 							for(int j=0;j<count;j++)
 							{
 								Document doc = searcher.doc(sd[j].doc);
 								title=doc.get("path");
+								
 								context.write(new Text(split[0]+"_"+split[1]), new Text(split[0]+"\t"+1+"\t"+title+"\t"+j+"\t"+sd[j].score+"\tdemo"));
 							}
 							//	System.out.println("Written to the file");

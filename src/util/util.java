@@ -34,6 +34,7 @@ import org.apache.lucene.util.Version;
 public class util {
 
 	static Pattern p=Pattern.compile("[A-Za-z]");
+	static Pattern n=Pattern.compile("[0-9\\.\\&\\']");
 	static Matcher m;
 
 	public static void printResultSet(TreeMap resultset,ArrayList reljd)
@@ -584,6 +585,13 @@ public class util {
 	public static boolean notNumber(String text)
 	{
 		m=p.matcher(text);
+		if(m.find())
+			return true;
+		return false;
+	}
+	public static boolean hasNumber(String text)
+	{
+		m=n.matcher(text);
 		if(m.find())
 			return true;
 		return false;

@@ -51,10 +51,14 @@ import extraction.phraseList;
  */
 public class phraseQuery {
 
-	List abst_phrase= new ArrayList();
+	/*List abst_phrase= new ArrayList();
 	List desc_phrase= new ArrayList();
 	List claim_phrase= new ArrayList();
-	List all_phrase= new ArrayList();
+	List all_phrase= new ArrayList();*/
+	HashMap <String,String>abst_phrase= new HashMap<String, String>();
+	HashMap <String,String>desc_phrase= new HashMap<String, String>();
+	HashMap <String,String>claim_phrase= new HashMap<String, String>();
+	HashMap <String,String>all_phrase= new HashMap<String, String>();
 	/*	MaxentTagger tagger ;
 	JTextPro jtp= new JTextPro();
 	 */
@@ -82,8 +86,8 @@ public class phraseQuery {
 			String split[];
 			String split2[];
 			String split3[];
-			List field=null;
-			String query;
+			HashMap<String, String> field=null;
+			String query1,query;
 			StringBuffer sb = new StringBuffer();
 			while ((line= br.readLine())!=null)
 			{
@@ -107,8 +111,14 @@ public class phraseQuery {
 					}
 					
 					query=util.tokenizeString(sb.toString(),sa);//,stop);
-					if(query.length()>2 && !field.contains(query) && util.notNumber(query) && query.length()<120)
-					field.add(query);
+					query1=sb.toString();
+					//if(query.startsWith("user"))
+					//	System.out.println("it contains "+!field.containsKey(query));
+					if(query.length()>2 && !field.containsKey(query) && util.notNumber(query) && query.length()<120)
+					{
+						//System.out.println("Putting "+query+"\t"+query1);
+						field.put(query,query1);
+					}
 					
 					sb.replace(0, sb.length(),"");
 				}
@@ -123,7 +133,7 @@ public class phraseQuery {
 
 		}
 	}
-	// when the phrases are chunked i.e. in brackets by section type - abstract , claim , description
+	/*// when the phrases are chunked i.e. in brackets by section type - abstract , claim , description
 	public void extractKPhrases(BufferedReader br,int k)
 	{
 		String line=null ;
@@ -259,7 +269,7 @@ public class phraseQuery {
 		StringBuffer query=new StringBuffer();
 		/*abst_phrase=util.removeStopWords(abst_phrase,stop);
 		desc_phrase=util.removeStopWords(desc_phrase,stop);
-		claim_phrase=util.removeStopWords(claim_phrase,stop);*/
+		claim_phrase=util.removeStopWords(claim_phrase,stop);
 				
 		//System.out.println("in return String "+type + "abst size "+abst_phrase.size() +" claim size "+claim_phrase.size());
 		try{
@@ -285,11 +295,11 @@ public class phraseQuery {
 		}
 /*		query.append("abstract\t"+type+"\t"+Qno+"\t"+abst1 + 
 				"\ndesc\t"+type+"\t"+Qno+"\t"+desc1+
-				"\nclaim\t"+type+"\t"+Qno+"\t"+claim1);*/
+				"\nclaim\t"+type+"\t"+Qno+"\t"+claim1);
 		return query.toString();
 	}
 
-
+*/
 
 	public String eachPhraseQuery(String Qno)
 	{
@@ -298,26 +308,33 @@ public class phraseQuery {
 		//desc_phrase=util.removeStopWords(desc_phrase,stop);
 		//claim_phrase=util.removeStopWords(claim_phrase,stop);
 		int ctr =0;
-		Iterator i=abst_phrase.iterator();
+		Iterator <Map.Entry<String, String>>i=abst_phrase.entrySet().iterator();
+		Map.Entry<String, String> map;
 		while(i.hasNext())
 		{
-			query.append("\nabstract\t"+ctr+"\t"+Qno+"\t\""+i.next()+"\"");
+			map=i.next();
+			//query.append("\nabstract\t"+ctr+"\t"+Qno+"\t\""+i.next()+"\"");
+			query.append("\nabstract\t"+ctr+"\t"+Qno+"\t"+map.getKey()+"\t"+map.getValue());
 			//query.append("\n"+Qno+"\t"+ctr+"\t\""+i.next()+"\"");
 			ctr++;
 		}
 
-		i=desc_phrase.iterator();
+		i=desc_phrase.entrySet().iterator();
 		while(i.hasNext())
 		{
-			query.append("\ndesc\t"+ctr+"\t"+Qno+"\t\""+i.next()+"\"");
+			map=i.next();
+			//query.append("\ndesc\t"+ctr+"\t"+Qno+"\t\""+i.next()+"\"");
+			query.append("\ndesc\t"+ctr+"\t"+Qno+"\t"+map.getKey()+"\t"+map.getValue());
 			//query.append("\n"+Qno+"\t"+ctr+"\t\""+i.next()+"\"");
 			ctr++;
 		}
 
-		i=claim_phrase.iterator();
+		i=claim_phrase.entrySet().iterator();
 		while(i.hasNext())
 		{
-			query.append("\nclaim\t"+ctr+"\t"+Qno+"\t\""+i.next()+"\"");
+			map=i.next();
+				//query.append("\nclaim\t"+ctr+"\t"+Qno+"\t\""+i.next()+"\"");
+			query.append("\nclaim\t"+ctr+"\t"+Qno+"\t"+map.getKey()+"\t"+map.getValue());
 			//query.append("\n"+Qno+"\t"+ctr+"\t\""+i.next()+"\"");
 			ctr++;
 		}
@@ -325,7 +342,7 @@ public class phraseQuery {
 		return query.toString();
 	}
 
-	public void allPhraseQuery(Searcher searcher,String Qno)
+/*	public void allPhraseQuery(Searcher searcher,String Qno)
 	{
 		abst_phrase=util.removeStopWords(abst_phrase,stop);
 		desc_phrase=util.removeStopWords(desc_phrase,stop);
@@ -430,7 +447,7 @@ public class phraseQuery {
 		List al = apl.returnTopK(n);
 		List dl = dpl.returnTopK(n);
 		List cl = cpl.returnTopK(n);
-		 */
+		 
 		//System.out.println("abstract phrases : "+al);
 		//System.out.println("description phrases : "+dl);
 		//System.out.println("claim phrases : "+cl);
@@ -472,7 +489,7 @@ public class phraseQuery {
 			closeAll();
 		}
 	}
-
+*/
 	public void clearAll()
 	{
 		abst_phrase.clear();
@@ -567,7 +584,7 @@ public class phraseQuery {
 		}
 	}
 
-	//when the phrases are arranged in decreasing order of some Value - tf , idf , tf-idf
+	/*//when the phrases are arranged in decreasing order of some Value - tf , idf , tf-idf
 	public void loadPhrases(BufferedReader patRead)
 	{
 		String line ;
@@ -658,7 +675,7 @@ public class phraseQuery {
 		}
 		return query.toString();
 	}
-
+*/
 	/**
 	 * @param args[0] type of the phrase query. Top k or all
 	 * @param args[1] query folder 
@@ -668,7 +685,7 @@ public class phraseQuery {
 	 * @param args[5] chunker --optional
 	 * @param args[6] no of phrases -- 0 for all 
 	 */
-	public static void main(String[] args) {
+/*	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		int n= Integer.parseInt(args[args.length-1]);
 		phraseQuery phQ=null;
@@ -740,7 +757,7 @@ public class phraseQuery {
 
 	}
 
-	
+	*/
 	public String concatPhrases(List l)
 	{
 		StringBuffer phrases=new StringBuffer();

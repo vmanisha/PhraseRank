@@ -46,8 +46,8 @@ public class prepareQueryPhrase {
  						{
  							modPhList.add(word);//modifyPhrase(word))
  							//phraseqList.add(type+":\""+word+"\"");
- 							phraseqList.add("\""+word+"\"");
- 							//phraseqList.add(word);
+ 							//phraseqList.add("\""+word+"\"");
+ 							phraseqList.add(word);
  						}
  						/*else 
  						{
@@ -100,16 +100,18 @@ public class prepareQueryPhrase {
  				{
  					split=line.split(":");
  					tf1=Float.parseFloat(split[4]); //tf in document
- 					avgTf1=Float.parseFloat(split[9]); //avgtf in document
- 					idf1=Float.parseFloat(split[16]);
+ 					//avgTf1=Float.parseFloat(split[9]); //avgtf in document
+ 					//idf1=Float.parseFloat(split[16]);
  					
+ 					//for word
+ 					idf1=(Float.parseFloat(split[9])+Float.parseFloat(split[10])+Float.parseFloat(split[11]))/3;
 	 				//System.out.println("tf="+tf+" idf="+idf+ " tfidf="+tf*idf + " "+split[0]);
  					tf.add(tf1);
- 					avgTf.add(avgTf1);
+ 					//avgTf.add(avgTf1);
  					idf.add(idf1);
 	 				tfidf.add(tf1*idf1);
 	 				phraseSVM.add(split[0]);
-	 				try{
+	 				/*try{
  						scs1=Float.parseFloat(split[21]);
  	 					av=Float.parseFloat(split[23]);
  	 				
@@ -131,8 +133,7 @@ public class prepareQueryPhrase {
  						System.out.println("found infinity "+split[0]);
  						MI.add((float)0);
 					}
- 					
- 	 				
+ 					*/
  				}
  			}
  			
@@ -157,12 +158,12 @@ public class prepareQueryPhrase {
 			prepareQueryPhrase pqp = new prepareQueryPhrase();
 			
 			File out = new File("tf-idf");
-			File out1 = new File("mi");
-			File out2 = new File("scs");
-			File out3 = new File("avictf");
+			//File out1 = new File("mi");
+			//File out2 = new File("scs");
+			//File out3 = new File("avictf");
 			File out4 = new File("tf");
 			File out5= new File("idf");
-			File out6 = new File("avgtf");
+			//File out6 = new File("avgtf");
 			
 			if(out.isDirectory())
 			{
@@ -172,12 +173,12 @@ public class prepareQueryPhrase {
 			else
 			{
 				out.mkdir();
-				out1.mkdir();
-				out2.mkdir();
-				out3.mkdir();
+				//out1.mkdir();
+				//out2.mkdir();
+				//out3.mkdir();
 				out4.mkdir();
 				out5.mkdir();
-				out6.mkdir();
+				//out6.mkdir();
 			}
 			
 			BufferedReader br2;
@@ -193,7 +194,7 @@ public class prepareQueryPhrase {
 				br2.close();
 				//load feature values
 				System.out.println("Reading phrase feature file.. ");
-				br2=new BufferedReader (new FileReader (new File(args[0]+"/p"+line)));
+				br2=new BufferedReader (new FileReader (new File(args[0]+"/w"+line)));
 				pqp.loadFeatures(br2);
 				br2.close();
 				
@@ -201,7 +202,7 @@ public class prepareQueryPhrase {
 				sortedPhrases=pqp.sortBy(pqp.tfidf);
 				writeToFile(out.getAbsolutePath()+"/"+line, line, sortedPhrases);
 				
-				System.out.println("Sorting MI.. ");
+				/*System.out.println("Sorting MI.. ");
 				sortedPhrases=pqp.sortBy(pqp.MI);
 				writeToFile(out1.getAbsolutePath()+"/"+line, line, sortedPhrases);
 
@@ -212,7 +213,7 @@ public class prepareQueryPhrase {
 				System.out.println("Sorting avictf.. ");
 				sortedPhrases=pqp.sortBy(pqp.avictf);
 				writeToFile(out3.getAbsolutePath()+"/"+line, line, sortedPhrases);
-
+				*/
 				System.out.println("Sorting tf.. ");
 				sortedPhrases=pqp.sortBy(pqp.tf);
 				writeToFile(out4.getAbsolutePath()+"/"+line, line, sortedPhrases);
@@ -221,9 +222,10 @@ public class prepareQueryPhrase {
 				sortedPhrases=pqp.sortBy(pqp.idf);
 				writeToFile(out5.getAbsolutePath()+"/"+line, line, sortedPhrases);
 				
-				System.out.println("Sorting avg tf.. ");
+				/*System.out.println("Sorting avg tf.. ");
 				sortedPhrases=pqp.sortBy(pqp.avgTf);
-				writeToFile(out6.getAbsolutePath()+"/"+line, line, sortedPhrases);
+				writeToFile(out6.getAbsolutePath()+"/"+line, line, sortedPhrases);*/
+				
 			}
 			br.close();
 		}
@@ -299,10 +301,10 @@ public class prepareQueryPhrase {
 				query.append(v.get(0));
 			j++;
 			i.next();
-			while(i.hasNext() && j<36)
+			while(i.hasNext() && j<40)
 			{
-				query.append(" OR "+i.next());
-				
+				//query.append(" OR "+i.next());
+				query.append(" "+i.next());
 				if(j%5==0)
 					bw.write("\n"+qNo+"\t"+j+"\t"+query.toString());
 				j++;
@@ -314,6 +316,28 @@ public class prepareQueryPhrase {
 			e.printStackTrace();
 		}
 	}
+
+	public static void writeToFileSimple(String file,String qNo,Vector v)
+	{
+		try{
+			BufferedWriter bw = new BufferedWriter (new FileWriter(new File(file),true));
+			Iterator i = v.iterator();
+			
+			int j=1;
+			while(i.hasNext() && j<40)
+			{
+				
+					bw.write("\n"+i.next());
+				j++;
+			}
+			bw.close();
+
+		}catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+
 	
 	private static String filename(int qno) {
 		// TODO Auto-generated method stub

@@ -56,7 +56,7 @@ public class readSVMPredictions {
 				fsplit=line.split("#");
 				ssplit=fsplit[0].split(" ");
 				currQno=Integer.parseInt(ssplit[1].substring(4)); //qid: length =4
-				System.out.println("qid "+ssplit[1] + "curr Qno"+currQno);
+				//System.out.println("qid "+ssplit[1] + "curr Qno"+currQno);
 				//send it to the phraseRank holder class
 				if(Qno!=0 && currQno!=Qno)
 				{
@@ -112,18 +112,29 @@ public class readSVMPredictions {
 			for(int i =0;i<10;i++)
 			{
 				if(prec[i]>0)
-				System.err.println("Prec @ "+i*5+" : "+prec[i]/count);
+				{
+					System.err.println("Prec @ "+i*5+" : "+prec[i]/count);
+					System.out.println("Prec @ "+i*5+" : "+prec[i]/count);
+				}
+				
 			}
 			
 			for(int i =0;i<10;i++)
 			{
 				if(recall[i]>0)
-				System.err.println("Recall @ "+i*5+" : "+recall[i]/count);
+				{
+					System.err.println("Recall @ "+i*5+" : "+recall[i]/count);
+					System.out.println("Recall @ "+i*5+" : "+recall[i]/count);
+				}
 			}
 			//System.out.println("Average bot 50 overlap   "+sumBot50/count);
 			System.err.println("Average pos Best phrase  "+sumBestPos/count);
 			System.err.println("Average pos oBest phrase "+sumOBestPos/count);
-			System.err.println("Average pos Worst phrase "+sumWorstPos/count);                                                                  
+			System.err.println("Average pos Worst phrase "+sumWorstPos/count);
+			
+			System.out.println("Average pos Best phrase  "+sumBestPos/count);
+			System.out.println("Average pos oBest phrase "+sumOBestPos/count);
+			System.out.println("Average pos Worst phrase "+sumWorstPos/count);
 		}
 		catch (Exception e) {
 			// TODO: handle exception
