@@ -17,10 +17,6 @@ import rankPhrase.testTrain.prepareTopPhraseQuery;
 
 import useless.phraseQuery;
 
-
-
-
-
 /**
  * 	generate queries for the map-reduce program;
  * args[0] = type -- all or k or patent 

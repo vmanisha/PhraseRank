@@ -38,7 +38,7 @@ import rankPhrase.calFeatures.findFeatures;
 
 import util.util;
 
-import jtextpro.JTextPro;
+
 
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import extraction.phraseList;

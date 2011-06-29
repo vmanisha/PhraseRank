@@ -16,7 +16,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jtextpro.JTextPro;
+
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queryParser.CharStream;
@@ -43,6 +43,7 @@ public class test {
 			System.out.println("MILGAYA");
 				
 		String line = "I have to go am going sales Steven<tab>Chaney + PATENT-US-GRT-2001-06189043  aaaabbb cc atcg atcgff <DOCNO>PATENT-US-GRT-2001-06189043</DOCNO>  The first router then computes an optimum assignment of a replica copy of the information, for storage in at least one newly assigned server in the network";//; No. 60/023,904 filed Aug. 14, 1996. TECHNICAL FIELD The present invention relates to television (TV) cable/antenna systems, and in particular, to a TV graphical user interface (GUI)";
+		System.out.println(line.substring(0,3));
 		util util = new util();
 		String line2 = "<DOCNO>PATENT-US-GRT-2001-06189043</DOCNO>";
 		long n1=23;
@@ -60,6 +61,23 @@ public class test {
 		while(m1.find())
 		{
 			System.out.println("Word "+m1.group());
+		}
+		
+		lang=Pattern.compile("^(\\S)[\\s,]*(\\S*)[\\s,]*(.*)");
+		 m1=lang.matcher("PATENTUSGRT199905912552 PATENTUSGRT199905912552 convert high effici light load convert maintain high effici broad");
+		while(m1.find())
+		{
+			
+			System.out.println("Word "+m1.group());
+		}
+	
+		Pattern symbol = Pattern.compile("[\\+\\=\\_\\|\\!\\@\\#\\$\\%\\^\\&\\*\\(\\)\\{\\}\\[\\]\\.\\,\\<\\>\\?]");
+		Matcher check = symbol.matcher("presenting a shining, appealing surface. to \"block\" (adhere ");
+		while(check.find())
+		{
+			//pat=m.group();
+			System.out.println(check.group());
+			//text=text.replaceAll(pat," "+pat+" ");
 		}
 		/*int len=str.length();
 		int i=10;
@@ -230,6 +248,21 @@ public class test {
 			line =m.replaceAll(" ");
 			System.out.println("line "+line);
 			
+			double [] vector =new double[5];
+			Vector <double []> list = new Vector<double[]>();
+			list.add(vector.clone());
+			for(int k =0;k<vector.length;k++)
+				System.out.print(" "+vector[k]);
+			System.out.println();
+			modifyVector(vector);
+			list.add(vector);
+			
+			for(int k =0;k<vector.length;k++)
+				System.out.print(" "+list.get(0)[k]);
+			System.out.println();
+			for(int k =0;k<vector.length;k++)
+				System.out.print(" "+list.get(1)[k]);
+			
 		}
 		catch (Exception e) {
 			// TODO: handle exception
@@ -238,6 +271,11 @@ public class test {
 		
 		
 		
+	}
+	public static void modifyVector(double [] vector)
+	{
+		for(int i =0;i<vector.length;i++)
+			vector[i]+=5.0;
 	}
 	
 	public static void Stringmaker (String make){

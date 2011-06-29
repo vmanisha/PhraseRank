@@ -16,7 +16,7 @@ import util.util;
 /**
  * @author mansi
  * To count chunked phrases in the document 
- * The phrases are counted -- Field Wise i.e. for abstract, description and claims indiviodually
+ * The phrases are counted -- Field Wise i.e. for abstract, description and claims individually
  *
  */
 public class countPhrases {

@@ -1,14 +1,10 @@
 package index;
 
-import java.awt.List;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.RandomAccessFile;
-import java.util.Iterator;
-import java.util.Vector;
-
-import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
+import org.apache.lucene.analysis.StopAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexWriter;
@@ -17,7 +13,8 @@ import util.util;
 
 public class read {
 
-	static SnowballAnalyzer en;
+	//static SnowballAnalyzer en;
+	static StopAnalyzer en;
 	//Vector <String> qList; //List of query files
 	Document pat = null;
 	IndexWriter writer;
@@ -37,7 +34,7 @@ public class read {
 	public void loadstop(File stop)
 	{
 		try{
-			en=util.LoadStopWords(new BufferedReader(new FileReader(stop)));
+			en=util.LoadStopAnalyzer(new BufferedReader(new FileReader(stop)));
 		}
 		catch(Exception ex)
 		{
@@ -91,6 +88,11 @@ public class read {
 						//if(qList.contains(docNo))
 						//	QDocNo.add(docNo+":"+writer.numDocs());
 						pat.add(new Field("path",docNo,Field.Store.YES,Field.Index.NO));
+					}
+					else if(line.startsWith("<TITLE>"))
+					{
+						docNo=line.substring(line.indexOf(">")+1,line.lastIndexOf("<"));
+						pat.add(new Field("title",docNo,Field.Store.NO,Field.Index.NOT_ANALYZED,Field.TermVector.NO));
 					}
 					
 					content.append(" "+line2);

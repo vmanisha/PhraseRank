@@ -468,3 +468,169 @@ Vector <Double> dphraseCount = new Vector<Double> ();
 	
 */
 
+/*public void iterateFile()
+{
+	Iterator<String> i;
+	String fileName;
+	double [] vector,tvector;
+	int size=0;
+	DecimalFormat df = new DecimalFormat("0.00");
+	for(int ctr=0;ctr<2;ctr++)
+	{
+		i = patList.iterator();
+
+		while(i.hasNext())
+		{
+			fileName=i.next();
+			size=0;
+			//done.clear();
+			//if(fileName.startsWith("WO"))
+
+			if(category.containsKey(fileName) && (inlink.containsKey(fileName) || outlink.containsKey(fileName)))
+			{
+				if(!oldPatVector.containsKey(fileName) && !patVector.containsKey(fileName))
+				{
+					vector = new double [FeatSize];
+					getCategoryVector(fileName, vector, 1);
+					patVector.put(fileName, vector);
+				}
+				else 
+				{
+					vector= new double [FeatSize];
+					//if(outlink.containsKey(fileName))
+					//size+=outlink.get(fileName).size();
+					//if(inlink.containsKey(fileName))
+					//size+=inlink.get(fileName).size();
+					size+=findVector(fileName,vector,outlink,2);
+					size+=findVector(fileName,vector,inlink,2);
+					if(size==0)
+					{
+						System.out.println("No inlinks & outlinks "+fileName);
+						size=1;
+					}
+					tvector=oldPatVector.get(fileName);
+					//if(fileName.equals("EP-0000001"))
+					//	System.out.println("size  "+size);
+					for(int k=0;k<vector.length;k++)
+					{
+						//if(tvector[k]>0.0 && fileName.equals("EP-0000001"))
+						//	System.out.println(tvector[k]+", "+vector[k]+", "+vector[k]/size );
+						vector[k]/=size;
+						vector[k]+=tvector[k];
+					}
+					patVector.put(fileName, vector);
+					//System.out.print(fileName+":");
+					//for(int j=0;j<vector.length;j++)
+					//	System.out.print(" "+df.format(vector[j]));
+					//System.out.println();
+
+				}
+			}
+		}
+		oldPatVector.putAll(patVector);
+		patVector.clear();
+	}
+	util.util.writeText(oldPatVector, "patentVectors");
+}
+
+
+public int findVector(String pat,double [] vector,HashMap <String,Vector <String>> object,int level)
+{
+
+	Vector <String> temp ;
+	Iterator <String>cit;
+
+	String pat1;
+	if(object.containsKey(pat)) //if this patent cites another patent
+	{
+		temp=object.get(pat);
+		cit= temp.iterator();
+		while(cit.hasNext())
+		{
+			pat1=cit.next();
+			getCategoryVector(pat1, vector, level);
+			//System.out.println("pat "+pat1);
+		}
+		for(int i=0;i<vector.length;i++)
+		{
+			//if(pat.equals("EP-0000001") && vector [i]>0.0)
+			//	System.out.println(vector[i]+", "+vector[i]*temp.size());
+			vector[i]*=temp.size();
+		}
+		return temp.size();
+	}
+	return 0;
+}*/
+/***
+ * 
+ * @param category = category to give the score for.
+ * @param level = where in the citation tree it is
+ * @param size = no of categories for that node
+ * 
+ * We dont consider broad types A,B,..H (results in skewed results)
+ * Added the *(1/size) to give the probability of that category 
+ * Multiplied by length 3 or 4 to emphasize that deeper the category match the better.
+ */
+
+/*	public void updateCategoryScore(double [] vector ,String category, int level,double prob)
+{
+	//get the section first A to G
+	int pos;
+	try {
+
+//		pos=getSymbolPos(category.substring(0,1));
+//		if(pos!=-1)
+//		{
+//			//System.out.println("cat "+symbols.get(pos)+" score:"+(1.0/level)+" old score:"+vector[pos]+" level"+level);
+//			vector[pos]+=(1.0/level)*(1.0/size);
+//		}
+//		 
+
+		//get the class of the section A0 to ...
+
+		pos=getSymbolPos(category.substring(0,3));
+		if(pos!=-1)
+		{
+			//System.out.println("cat "+symbols.get(pos)+" score:"+(1.0/level)+" old score:"+vector[pos]);
+			//System.out.println("pos 2 "+pos);
+			vector[pos]+=(1.0/level)*(3.0/4.0)*(prob);
+		}
+
+		//get the sublass too G06T
+		pos=getSymbolPos(category);
+		if(pos==-1)
+			System.err.println(category);
+		else	
+		{
+			//System.out.println("pos 3 "+pos);
+			//System.out.println("cat "+symbols.get(pos)+" score:"+(1.0/level)+" old score:"+vector[pos]);
+			vector[pos]+=(1.0/level)*(prob);
+		}
+	}
+	catch (Exception e) {
+		// TODO: handle exception
+		e.printStackTrace();
+		System.out.println("Category "+category);
+		System.exit(0);
+	}
+
+}*/
+
+	/*public void getCategoryVector (String pat, double [] vector,int level)
+	{
+		HashMap <String,Integer> catTemp;
+		Iterator<Map.Entry<String, Integer>>cat;
+		if(category.containsKey(pat))
+		{
+			catTemp=category.get(pat);
+			cat=catTemp.entrySet().iterator();
+			int totCount=getCategoryCount(catTemp);
+			Map.Entry<String, Integer> map;
+			while(cat.hasNext())
+			{
+				map=cat.next();
+				updateCategoryScore(vector,map.getKey(),level,(double)map.getValue()/totCount);
+			}
+
+		}
+	}*/

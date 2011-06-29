@@ -1,11 +1,14 @@
 package extraction;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.StringReader;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -13,19 +16,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.lucene.analysis.Token;
-import org.apache.lucene.analysis.TokenStream;
+import opennlp.tools.lang.english.TreebankChunker;
+
 import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
-import org.apache.lucene.analysis.tokenattributes.TermAttribute;
-import org.apache.lucene.analysis.tokenattributes.TermAttributeImpl;
 
 import util.util;
 
-import jtextpro.JTextPro;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
@@ -44,13 +43,13 @@ public class processClaims {
 
 
 	MaxentTagger tagger ;
-	JTextPro jtp= new JTextPro();
 
-	Map <Integer, List> cPhraseList = new TreeMap<Integer,List>();
+	Map <Integer, List> cPhraseList;
 	int [][] cNetwork;
 	//Vector <Integer> network [];
 	int relations=0;
 	int claimFreq[];
+	TreebankChunker chunker ;
 	public void splitClaim(String claim)
 	{
 		String newclaim;
@@ -65,33 +64,43 @@ public class processClaims {
 
 		cNetwork= new int [split.length][split.length];
 		claimFreq=new int [split.length];
+		cPhraseList.clear();
+		relations=0;
 		//to find linkages
 		String claimreg = "claim [0123456789]+?";
 		Pattern findc= Pattern.compile(claimreg);
 		Matcher mfindc;
-		String cnumber;
-
-		for(int i=0;i<split.length;i++)
+		String cnumber=null;
+		int it=0;
+		try 
 		{
-			claimFreq[i]=0;
-			if(split[i].startsWith("CLAIM") && split[i].length()>7)
+			for(it=0;it<split.length;it++)
 			{
-				//find the phrases and store them.
-				//System.out.println("---- Printing Tags ----");
-				cPhraseList.put(i, extractNouns(split[i].substring(5)));
-				mfindc=findc.matcher(split[i]);
-				while(mfindc.find())
+				claimFreq[it]=0;
+				if(split[it].startsWith("CLAIM") && split[it].length()>7)
 				{
-					cnumber =mfindc.group();
-					cnumber=cnumber.replace("claim ", "");
-					cNetwork[i][Integer.parseInt(cnumber.trim())]=1;
-					claimFreq[Integer.parseInt(cnumber.trim())]+=1;
-					//	System.out.println("claim "+i+" refers to "+ Integer.parseInt(cnumber));
+					//find the phrases and store them.
+					//System.out.println("---- Printing Tags ----");
+					cPhraseList.put(it, extractNouns(split[it].substring(5)));
+					mfindc=findc.matcher(split[it]);
+					while(mfindc.find())
+					{
+						cnumber =mfindc.group();
+						cnumber=cnumber.replace("claim ", "");
+						cNetwork[it][Integer.parseInt(cnumber.trim())]=1;
+						claimFreq[Integer.parseInt(cnumber.trim())]+=1;
+						//	System.out.println("claim "+i+" refers to "+ Integer.parseInt(cnumber));
+					}
 				}
 			}
-		}
 
-		System.out.println("---- Printing the matrix -----");
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+			System.out.println(cnumber.trim() + " length "+split.length + " "+ split[it]);
+			e.printStackTrace();
+		}
+		/*System.out.println("---- Printing the matrix -----");
 		for(int i=0;i<split.length;i++)
 		{
 			System.out.print("\n"+claimFreq[i]+"\t");	
@@ -99,8 +108,8 @@ public class processClaims {
 				if(cNetwork[i][j]==1)
 					System.out.print("["+i+","+j+"]\t");
 		}
-
-		System.out.println("--- Words for each Claim ---");
+		 */
+		//System.out.println("--- Words for each Claim ---");
 
 		Set s= cPhraseList.entrySet();
 		Iterator i = s.iterator();
@@ -116,11 +125,11 @@ public class processClaims {
 		while(i.hasNext())
 		{
 			m=(Map.Entry)i.next();
-			System.out.println("\nClaim no : "+m.getKey()+" size "+((List)m.getValue()).size());
+			//System.out.println("\nClaim no : "+m.getKey()+" size "+((List)m.getValue()).size());
 			i2=((List)m.getValue()).iterator();
 			//make the list of new phrases relations
 			relList= new ArrayList <String>();
-			System.out.println("Phrases are : ");
+			//System.out.println("Phrases are : ");
 			while(i2.hasNext())
 			{
 				phList=(String)i2.next();
@@ -159,12 +168,9 @@ public class processClaims {
 	{
 
 		try{
-			//tagger = new MaxentTagger("/home/mansi/lib/stanford-postagger-full-2010-05-26/models/bidirectional-distsim-wsj-0-18.tagger");
-			jtp.setPhraseChunkerModelDir("/home/mansi/lib/JTextPro/models/CRFChunker");
-			jtp.setSenSegmenterModelDir("/home/mansi/lib/JTextPro/models/SenSegmenter");
-			jtp.initPhraseChunker();
-			jtp.initSenSegmenter();
-
+			tagger = new MaxentTagger("lib/stanford-postagger-full-2010-05-26/models/bidirectional-distsim-wsj-0-18.tagger");
+			chunker = new TreebankChunker("lib/EnglishChunk.bin.gz");
+			cPhraseList = new TreeMap<Integer,List>();
 		}
 		catch(Exception ex)
 		{
@@ -172,127 +178,253 @@ public class processClaims {
 		}
 
 	}
+	
+	
+	public Map rankRelation(SnowballAnalyzer sa, int totalWords, HashMap <String,Integer> wordcount)
+	{
+		StringBuffer newRelation=new StringBuffer();
+		StringBuffer noChunkRel= new StringBuffer();
+		Map finalRelations = new TreeMap <String,Double>();
+		Map <String,String>originalStemmedMapping = new TreeMap <String,String>();
+		double relScores[]=null;
+		Iterator <Map.Entry<Integer, List>> it;
+		String split []=null;
+		String relation=null;
+		Map.Entry <Integer,List>me;
+		Iterator <String>it2;
+		Iterator <String>tokenIt;
+		String term;
+		int relLength=0;
+		// get the scores of each phrase by add the norm tf of each word in phrase 
+		relScores= new double [relations];
+		int ctr=0;
+		it = cPhraseList.entrySet().iterator();
+		newRelation.replace(0, newRelation.length(), "");
+		noChunkRel.replace(0, noChunkRel.length(), "");
+		
+		while(it.hasNext())
+		{
+			me=it.next();
+			//System.out.println("\n-------------claim no "+me.getKey()+"-------------");
+			it2=me.getValue().iterator();
+			while(it2.hasNext())
+			{
+				relation=it2.next();
+				relLength=0;
+				split=relation.split(" ");
+				//System.out.println("\n"+ctr+". ");
+				for(int k =0;k<split.length;k++)
+				{
+					if(!(split[k].startsWith("[")|| split[k].startsWith("]")))
+					{
+						//get the tokens
+						tokenIt=util.getTokens(split[k], sa).iterator();
+						while(tokenIt.hasNext())
+						{
+							term=tokenIt.next();
+							if(util.notNumber(term))
+							{
+								if(wordcount.get(term)!=null)
+									relScores[ctr]+=wordcount.get(term);
+
+								newRelation.append(term+" ");
+								noChunkRel.append(split[k]+ " ");
+							}
+							relLength++;
+						}
+					}
+				}
+				relScores[ctr]/=(totalWords*relLength);
+				if(claimFreq[me.getKey()]>0)
+					relScores[ctr]*=((double)claimFreq[me.getKey()]/claimFreq.length);
+				
+				//System.out.println(ctr+". "+newRelation+" "+relScores[ctr]);
+				finalRelations.put(newRelation.toString(), relScores[ctr]);
+				originalStemmedMapping.put(newRelation.toString(), noChunkRel.toString());
+				newRelation.replace(0, newRelation.length(), "");
+				noChunkRel.replace(0, noChunkRel.length(), "");
+				ctr++;
+			}
+		}
+		Map sList=util.sortByValues(finalRelations);
+		//System.out.println("size "+sList);
+		return sList;
+		
+	}
 
 	/***
 	 * 
-	 * @param args[0] Patent Query 
+	 * @param args[0] Patent Query directory 
 	 * @param args[1] Stop file
+	 * @param args[2] Output dir
+	 * @param args[3] keys directory (from supervised approach)
 	 */
 	public static void main(String args[])
 	{
+		ArrayList <File> al = util.makefilelist(new File(args[0]),new ArrayList<File>());
+		Collections.sort(al);
+		Iterator <File> i = al.iterator();
+		String outputDir = args[2];
+
+		processClaims pc = new processClaims();
+		String line,term=null,split[];
+		BufferedReader br ;
+		BufferedWriter bw ;
+		File f;
+		DecimalFormat df = new DecimalFormat("0.000");
+		Iterator <String>tokenIt;
+
+		File f2= new File(outputDir);
+		int totalWords;
+		
+		
+		
+		//int k=0;
+		HashMap <String,Integer> wordcount = new HashMap <String,Integer>();
+
 		try{
-
-			String line;
-			HashMap <String,Integer> wordcount = new HashMap <String,Integer>();
 			SnowballAnalyzer sa = util.LoadStopWords(new BufferedReader (new FileReader(new File(args[1]))));
-			processClaims pc = new processClaims();
-			TokenStream ts;
-			Token tok;
-			TermAttributeImpl ati= new TermAttributeImpl();
-			BufferedReader br = new BufferedReader (new FileReader (new File(args[0])));
-			int totalWords=0;
-			while((line=br.readLine())!=null){
-
-				ts=sa.tokenStream("word", new StringReader(line));
-				TermAttribute ta=ts.addAttribute(TermAttribute.class);
-				ts.addAttributeImpl(ati);
-
-				while(ts.incrementToken())
-				{
-					//if(text.indexOf("1000")!=-1)
-					//	System.out.println("word "+text+" tok "+ta.term());
-					if(wordcount.containsKey(ta.term()))
-						wordcount.put(ta.term(), wordcount.get(ta.term())+1);
-					else 
-						wordcount.put(ta.term(),1);
-					totalWords++;
-				}
-				if(line.startsWith("<CLAIM>"))
-				{
-					//System.out.println("came here");
-					pc.splitClaim(line);
-				}
-			}
-
-
-			// get the scores of each phrase by add the norm tf of each word in phrase 
-			double relScores[]= new double [pc.relations];
-			int ctr=0;
-			Iterator <Map.Entry<Integer, List>> it = pc.cPhraseList.entrySet().iterator();
-			Map.Entry <Integer,List>me;
-			StringBuffer newRelation=new StringBuffer();
-			Iterator <String>it2;
-			String relation;
-			String split [];
-			int relLength=0;
-			Map finalRelations = new TreeMap <String,Double>();
-
-			System.out.println("Total words "+totalWords);
-			while(it.hasNext())
+			if(f2.isDirectory())
 			{
-				me=it.next();
-				System.out.println("\n-------------claim no "+me.getKey()+"-------------");
-				it2=me.getValue().iterator();
-				while(it2.hasNext())
-				{
-					relation=it2.next();
-					relLength=0;
-					split=relation.split(" ");
-					//System.out.println("\n"+ctr+". ");
-					for(int k =0;k<split.length;k++)
-					{
-						if(!(split[k].startsWith("[")||split[k].startsWith("]")))
-						{
-							//get the tokens
-							//newRelation.append(split[k]+" ");
-							ts=sa.tokenStream("word", new StringReader(split[k]));
-							TermAttribute ta=ts.addAttribute(TermAttribute.class);
-							ts.addAttributeImpl(ati);
-							while(ts.incrementToken())
-							{
-								relScores[ctr]+=wordcount.get(ta.term());
-								newRelation.append(ta.term()+" ");
-								//System.out.print(" "+ta.term()+"="+wordcount.get(ta.term()));
-								relLength++;
-							}
-						}
-					}
-					relScores[ctr]/=(totalWords*relLength);
-					if(pc.claimFreq[me.getKey()]>0)
-						relScores[ctr]*=pc.claimFreq[me.getKey()];//((double)pc.claimFreq[me.getKey()]/pc.claimFreq.length);
-					else 
-						relScores[ctr]*=((double)1/pc.claimFreq.length);
-					System.out.println(ctr+". "+newRelation+" "+relScores[ctr]);
-					finalRelations.put(newRelation.toString(), relScores[ctr]);
-					newRelation.replace(0, newRelation.length(), "");
-					ctr++;
-				}
+				System.out.println("Output dir already exists");
+				System.exit(0);
 			}
+			else
+				f2.mkdir();
 
-			//Get the relations (Select top 10)
-			Map sList=util.sortByValues(finalRelations);
-			StringBuffer query = new StringBuffer();
-			ctr=0;
-			Iterator <Map.Entry<String, Double>>i = sList.entrySet().iterator();
-			Map.Entry<String, Double> score;
 			while(i.hasNext())
-			{
-				score=i.next();
-				//System.out.println("key "+score.getKey()+" "+score.getValue());
-				//split=i.next().getKey().split(" ");
-				/*for (int j =0;j<split.length;j++)
-					if (query.indexOf(split[j])==-1)
+			{	
+				
+				f=i.next();
+				br =new BufferedReader (new FileReader(f));
+				bw = new BufferedWriter(new FileWriter(outputDir+"/"+f.getName()));
+				totalWords=0;
+				wordcount.clear();
+				
+				while((line=br.readLine())!=null)
+				{
+					tokenIt=util.getTokens(line, sa).iterator();
+					while(tokenIt.hasNext())
 					{
-						query.append(" "+split[j]);
-						
-					}*/
-				query.append(score.getKey());
-				if (ctr>=(pc.relations*0.20))
-					break;
-				ctr++;
-			}
-			System.out.println("Query is "+query.toString());
+						//if(text.indexOf("1000")!=-1)
+						//	System.out.println("word "+text+" tok "+ta.term());
+						term=tokenIt.next();
+						if(wordcount.containsKey(term))
+							wordcount.put(term, wordcount.get(term)+1);
+						else 
+							wordcount.put(term,1);
+						totalWords++;
+					}
+					if(line.startsWith("<CLAIM>"))
+						pc.splitClaim(line);
+
+				}
+				br.close();
+				System.out.println("Total words "+totalWords);
+				
+	
+				//Get the relations (Select top 10)
+				Map sList=pc.rankRelation(sa, totalWords, wordcount);
+				//StringBuffer midQuery = new StringBuffer();
+				//StringBuffer midQueryWScore = new StringBuffer();
+				StringBuffer wordQuery = new StringBuffer();
+				//StringBuffer scoreQuery = new StringBuffer();
+				int ctr=0;
+			//	double pscore=0.0f;
+			//	int relctr=0,midctr=0;
+				Iterator <Map.Entry<String, Double>>it4 = sList.entrySet().iterator();
+				
+				Map.Entry<String, Double> score;
 			
+				while(it4.hasNext())
+				{
+					score=it4.next();
+					//System.out.println("key "+score.getKey()+" "+score.getValue());
+					/*if(midQuery.indexOf(score.getKey())==-1)
+					{
+						midQuery.append(" "+score.getKey());
+						//midQueryWScore.append(" ("+originalStemmedMapping.get(score.getKey())+")^"+df.format(score.getValue()));
+					}*/
+
+					split=score.getKey().split(" ");
+					for (int j =0;j<split.length;j++)
+					{
+						if (wordQuery.indexOf(split[j])==-1 && ctr<=40)
+						{
+							wordQuery.append(" \""+split[j]+"\"");
+							ctr++;
+						}
+						/*if (score.getValue() >= 0.50*pscore && score.getValue() > .001)
+						{
+							scoreQuery.append(" "+split[j]);
+							pscore=score.getValue();
+						}*/
+					}
+					
+					
+					/*if (relctr == (int)(pc.relations*0.35) )
+					{
+						bw.write("\n"+f.getName()+"\t"+.35+"\t"+midQuery.toString().trim());
+						break;
+					}
+					relctr++;*/
+					if(ctr==40)
+						break;
+				}
+				
+				//bw.write("\n"+f.getName()+"\t"+40+"\t"+wordQuery.toString().trim());
+				//bw.write("\n"+f.getName()+"\t"+50+"\t"+scoreQuery.toString().trim());
+
+				ctr=0;
+			//	relctr=0;
+			//	midctr=0;
+				//write the queries made by combining supervised keys 
+				br = new BufferedReader(new FileReader(new File(args[3]+"/"+f.getName()+".key")));
+				while((line=br.readLine())!=null)
+				{
+					//tokenIt=pc.getTokens(line, sa).iterator();
+					//while(tokenIt.hasNext())
+					//{
+						term=line;//tokenIt.next();
+						if(wordcount.containsKey(term) && wordcount.get(term)>3 && term.length()>2)
+						{
+							if(wordQuery.indexOf(term)==-1)
+							{
+								wordQuery.append(" "+term);
+								ctr++;
+							}
+							/*if(scoreQuery.indexOf(term)==-1)
+							{
+								scoreQuery.append(" "+term);
+								relctr++;
+							}
+							if(midQuery.indexOf(term)==-1)
+							{
+								midQuery.append(" "+term);
+								//midQueryWScore.append(" "+split[j]);
+								midctr++;
+							}*/
+						}	
+					//}
+					//split=line.split(" ");
+					//for(int j=0;j<split.length;j++)
+					//{
+					//}
+				}
+				br.close();
+				if(ctr>0)
+					bw.write("\n"+f.getName()+"\t"+70+"\t"+wordQuery.toString().trim());
+				/*if(relctr>0)
+					bw.write("\n"+f.getName()+"\t"+80+"\t"+scoreQuery.toString().trim());
+				if(midctr>0)
+				{
+					bw.write("\n"+f.getName()+"\t"+.75+"\t"+midQuery.toString().trim());
+					//bw.write("\n"+f.getName()+"\t"+"80w"+"\t"+midQueryWScore.toString().trim());
+				}*/
+				//System.out.println("Query is "+query.toString());
+
+				bw.close();
+			}
 
 			//Get the vocabulary of the top Kea phrases and Rank them accding to tf and
 			//keep those which are not with the relations
@@ -300,6 +432,7 @@ public class processClaims {
 		}
 		catch(Exception ex)
 		{
+			//System.out.println(" "+relScores[ctr]+" "+wordcount.get(ta.term())+" "+ta.term()+" "+split[k]+" "+relation);
 			ex.printStackTrace();
 		}
 
@@ -311,21 +444,22 @@ public class processClaims {
 		Iterator i;
 
 		TaggedWord tw;
-		List words= new ArrayList ();
-		List tags = new ArrayList ();
-		List chunks =null;
-		List nps= new ArrayList ();
+		List <String> words= new ArrayList <String>();
+		List <String> tags = new ArrayList <String>();
+		List <String> chunks=null;
+
 		List <String> finalChunks = new Vector <String>();
 		StringBuffer sb = new StringBuffer();
 		String chunk;
-
+		ArrayList<TaggedWord> tSentence;
 		try{
+			//System.out.println("Sentence "+text);
 			@SuppressWarnings("unchecked")
 			List<ArrayList<? extends HasWord>> sentences = tagger.tokenizeText(new StringReader(text));
 			for (ArrayList<? extends HasWord> sentence : sentences) 
 			{
-				ArrayList<TaggedWord> tSentence = tagger.tagSentence(sentence);
-
+				tSentence = tagger.tagSentence(sentence);
+				//System.out.println("Sentence  ");
 				i=tSentence.iterator();
 				while(i.hasNext())
 				{
@@ -335,23 +469,35 @@ public class processClaims {
 					tags.add(tw.tag());
 					// System.out.println("WORD=: "+tw.word() +" TAG=: "+tw.tag());// +" label "+tw.value());
 				}
-				chunks =jtp.doPhraseChunking(words, tags);
-				for(int j=0;j<words.size();j++)
+				chunks = chunker.chunk(words,tags);
+
+				for (int ci=0,cn=chunks.size();ci<cn;ci++)
 				{
-					chunk = (String)chunks.get(j);
-					if (chunk.startsWith("B"))
-						if (j==0)
-							sb.append("["+chunk.substring(2)+" "+words.get(j));
-						else 
-							sb.append(" ] ["+chunk.substring(2)+" "+words.get(j));	
-					else if (chunk.startsWith("I"))
-						sb.append(" "+words.get(j));
-					else if(chunk.startsWith("0"))
+					if (ci > 0 && !chunks.get(ci).startsWith("I-") && !chunks.get(ci-1).equals("O")) 
 					{
-						//System.out.println (" "+words.get(j)+" ");
+						sb.append(" ]");
+						//System.out.print(" "+chunks.get(ci));
+					}            
+					if (chunks.get(ci).startsWith("B-")) 
+					{
+						sb.append(" ["+chunks.get(ci).substring(2));
+						//System.out.print(" "+chunks.get(ci));
 					}
+
+					if(!chunks.get(ci).equals("O"))
+						sb.append(" "+words.get(ci) );
+					// if(!chunks.get(ci).equals("O"))
+					//System.out.print(" "+chunks.get(ci) + " "+words.get(ci));
 				}
-				sb.append(" ]\n");
+				if (!chunks.get(chunks.size()-1).equals("O")) 
+				{
+					sb.append(" ]");
+					//System.out.print(" "+chunks.get(chunks.size()-1));
+				}
+				sb.append("\n");
+				//System.out.println();
+
+				//System.out.println(sb.toString());
 				finalChunks.add(sb.toString());
 				words.clear();
 				tags.clear();
@@ -372,3 +518,18 @@ public class processClaims {
 
 }
 
+/*for(int j=0;j<words.size();j++)
+{
+	chunk = (String)chunks.get(j);
+	if (chunk.startsWith("B"))
+		if (j==0)
+			sb.append("["+chunk.substring(2)+" "+words.get(j));
+		else 
+			sb.append(" ] ["+chunk.substring(2)+" "+words.get(j));	
+	else if (chunk.startsWith("I"))
+		sb.append(" "+words.get(j));
+	else if(chunk.startsWith("0"))
+	{
+		//System.out.println (" "+words.get(j)+" ");
+	}
+}*/

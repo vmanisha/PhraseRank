@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 
+import org.apache.lucene.analysis.StopAnalyzer;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
@@ -31,10 +33,11 @@ public class tokenize {
 	int total_words=0;
 
 	static SnowballAnalyzer en;
-
+	//static StopAnalyzer en;
 	public tokenize (File inputFile)
 	{
 		try{
+			//en=util.LoadStopAnalyzer(new BufferedReader(new FileReader(inputFile)));
 			en=util.LoadStopWords(new BufferedReader(new FileReader(inputFile)));
 		}
 		catch(Exception ex)
@@ -43,40 +46,53 @@ public class tokenize {
 		}
 	}
 
-	public void parseFile(String inputFile,String outputFile) {
+	public void parseFile(File inputFile,String outputFile) {
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(inputFile));
-			BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile));
+			//BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile));
 			String line ;
 			String line2;
 			String patNo="";
 			Token t;
 			String word;
-			TokenStream ts=null;
+			TokenStream ts;
 			TermAttributeImpl ati= new TermAttributeImpl();
 			TermAttribute ta;
-			ts.addAttributeImpl(ati);
+			String name;
+			
+			name=inputFile.getName().replaceAll("-", "");
+			name=name.replaceAll("PATENTUSGRT", "");
+			System.out.print(name+" "+name);
 			while ((line=br.readLine())!=null)
 			{
 				if(line.startsWith("<TITLE>") || line.startsWith("<ABST>") || line.startsWith("<SPEC>")  || line.startsWith("<CLAIM>") )
 				{
-					bw.write("\n"+line.substring(0,line.indexOf(">")+1));
-					line2=util.process(line);
+					//bw.write("\n"+line.substring(0,line.indexOf(">")+1));
+					
+					line2=util.removeTags(line);
+					
+					//process(line);
+					//System.out.println("before line");
 					ts=en.tokenStream("content", new StringReader(line2));
 					ta=ts.addAttribute(TermAttribute.class);
+					ts.addAttributeImpl(ati);
 					while(ts.incrementToken())
 					{
+						//System.out.println("its working");
 						word=ta.term();
-						bw.write(" "+word);
+						if (word.length()>2 && !util.hasNumber(word) && word.length() < 35)//&& !(word.equals("lsquo") || word.equals("rsquo")))
+						System.out.print(" "+word);
+						//bw.write(" "+word);
 					}
-					bw.write(line.substring(line.lastIndexOf("<")));
+					//bw.write(line.substring(line.lastIndexOf("<")));
 				}
-				else 
+				/*else 
 				{
 					bw.write("\n"+line);
-				}
+				}*/
 			}
-			bw.close();
+			System.out.println();
+			//bw.close();
 			br.close();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -89,7 +105,11 @@ public class tokenize {
 		  
 	
 	}
-	
+	/***
+	 * 
+	 * @param args [0]= stopword file
+	 * @param args [1]= dirPath
+	 */
 	public static void main (String args [])
 	{
 		/*
@@ -103,11 +123,26 @@ public class tokenize {
 		File dir = new File(dirname);
 		dir.mkdir();
 		File f;
-		while(i.hasNext())
-		{
-			f=i.next();
-			tn.parseFile(f.getAbsolutePath(), dirname+"/"+f.getName());
+		int ctr=0;
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(new File("DocList")));
+			while(i.hasNext())
+			{
+				f=i.next();
+				bw.write("\n"+f.getName());
+				//System.err.println("the filename is "+f.getName());
+				//tn.parseFile(f.getAbsolutePath(), dirname+"/"+f.getName());
+				tn.parseFile(f,  dirname+"/"+f.getName());
+				
+				ctr++;
+			}
+			System.err.println("Total documents : "+ctr);
+			bw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		
 	
 	}
 }	
